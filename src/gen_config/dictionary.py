@@ -175,12 +175,22 @@ def NN_vector(NN_dict, cen_atom_dict, length):
         
 
 
-def main():
-    print('\n====================================================================\n')
-    print("\tConfigurational Dictionary Generator - v1.0 (2024)\n")
-    print("\t   Developed by: Benjamin E. Jolly; Lewis R. Owen\n")
-    print("\t\t    University of Sheffield, UK\n")
-    print("====================================================================\n")
+def run(cif, equivalence=None):
+    """
+    Generates the Configurational Dictionary files for one .cif structure - the .cellpos,
+    .initsub, .finsub, .basisX, .symX, .cfgdictX, and .binomX files described in the README.
+
+    Args:   cif          - Path to the .cif file to analyse.                    (Type: str)
+            equivalence  - Lattice-site equivalences to merge into combined sub-lattices,
+                            e.g. [[0, 1]] merges sites 0 and 1 into one disordered
+                            sub-lattice, [[0, 1], [2, 3]] merges two separate pairs. Each
+                            group may be a list of ints or a comma-separated string ("0,1").
+                            None (the default) prompts for this interactively, matching the
+                            original behaviour; [] explicitly skips equivalencing without
+                            prompting.                              (Type: list[list[int]] | None)
+    Returns:    filename_stem - The .cif path with its extension stripped, i.e. the common
+                                 prefix of every file this call writes.               (Type: str)
+    """
 
     #%%Read .cif file
 
@@ -208,9 +218,7 @@ def main():
 
     #%%
 
-    filename = input("Input .cif filename (Including file extension):\t")
-
-    filename = filename.strip('"')
+    filename = cif.strip('"')
 
     with open(filename, "r", encoding="utf-8") as file:
         line_read = file.readlines()
@@ -495,43 +503,63 @@ def main():
 
     #%% Set Equivalences
 
-    exit_condition = 0
     super_answer = []
-
-
-    atom_name_storage = [coord_df[1]]
 
     atom_name_storage = list(coord_df[1])
 
+    def _apply_equivalence_group(answer_list):
+        """Merges the sub-lattices named in `answer_list` (a list of ints) into one combined
+        sub-lattice, appending it to `supercell`/`atom_name_storage` in place."""
+        merge_df = pd.DataFrame()
+        for i in answer_list:
+            merge_df = pd.concat([merge_df, supercell[i]], axis=0)
 
-    if len(coord_df) > 1:
+        joined_element = '/'.join(atom_name_storage[i] for i in answer_list)
+        atom_name_storage.append(joined_element)
+
+        merge_df.drop_duplicates(inplace=True)
+        merge_df.reset_index(inplace=True)
+        merge_df.drop(['index'], axis=1, inplace=True)
+        supercell[len(supercell)] = merge_df
+
+    if len(coord_df) <= 1:
+        if equivalence:
+            raise ValueError("`equivalence` was given, but this structure only has one constituent atom type - there is nothing to merge.")
+        answer = 'None.'
+
+    elif equivalence is not None:
+        # Scripted path: use the given groups directly, no prompting.
+        for group in equivalence:
+            answer_list = [int(x) for x in (group.split(',') if isinstance(group, str) else group)]
+            super_answer.append(answer_list)
+            _apply_equivalence_group(answer_list)
+
+        if super_answer:
+            super_answer_merge = list(itertools.chain.from_iterable(super_answer))
+            super_answer_merge = list(dict.fromkeys(super_answer_merge))
+            for i in super_answer_merge:
+                del supercell[i]
+            supercell = {i: v for i, v in enumerate(supercell.values())}
+            answer = 'Y'
+        else:
+            answer = 'N'
+
+    else:
+        # Interactive path: prompt for each equivalence group in turn.
         answer = input("\nWould you like to set any lattice-site equivalences? (Y/N):\t").strip().upper()
 
         if answer == 'N':
             pass
         elif answer == 'Y':
 
+            exit_condition = 0
             while exit_condition == 0:
-            
+
                 answer_2 = input("Select equivalent atomic sublattices, in the form '0,1,2,...,N':\t")
-                answer_list = answer_2.split(',')
+                answer_list = [int(x) for x in answer_2.split(',')]
                 super_answer.append(answer_list)
-                merge_df = pd.DataFrame()
-            
-                for i in range(len(answer_list)):
-                    answer_list[i] = int(answer_list[i])
-                for i in answer_list:
-                    merge_df = pd.concat([merge_df, supercell[i]], axis=0)
-            
-                prefix = atom_name_storage[:answer_list[0]]
-                joined_element = '/'.join(atom_name_storage[i] for i in answer_list)
-                atom_name_storage.append(joined_element)
-            
-                merge_df.drop_duplicates(inplace=True)
-                merge_df.reset_index(inplace=True)
-                merge_df.drop(['index'], axis=1,inplace=True)
-                supercell[len(supercell)] = merge_df
-            
+                _apply_equivalence_group(answer_list)
+
                 answer_3 = input('Would you like to select another equivalency? (Y/N):\t').strip().upper()
 
                 if answer_3 == 'Y':
@@ -543,14 +571,10 @@ def main():
                         del  supercell[i]
                     supercell = {i: v for i, v in enumerate(supercell.values())}
                     exit_condition +=1
-    
+
         else:
             print('Invalid input.\n')
             sys.exit()
-
-    else:
-        answer = 'None.'
-        pass
 
     atom_name = pd.DataFrame(atom_name_storage)
 
@@ -1246,6 +1270,23 @@ def main():
     #%%%
 
     print("\n--------------End---------------\n\n")
+
+    return filename_stem
+
+
+def main(cif=None, equivalence=None):
+    """Interactive entry point: prompts for `cif` if it wasn't supplied, then delegates to run().
+    `equivalence` behaves as in run() - pass it to skip the equivalence prompts too."""
+    print('\n====================================================================\n')
+    print("\tConfigurational Dictionary Generator - v1.0 (2024)\n")
+    print("\t   Developed by: Benjamin E. Jolly; Lewis R. Owen\n")
+    print("\t\t    University of Sheffield, UK\n")
+    print("====================================================================\n")
+
+    if cif is None:
+        cif = input("Input .cif filename (Including file extension):\t")
+
+    return run(cif, equivalence=equivalence)
 
 
 

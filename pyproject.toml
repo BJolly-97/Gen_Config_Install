@@ -24,10 +24,6 @@ dev = ["pytest>=7.0"]
 
 [project.scripts]
 gen-config = "gen_config.cli:main"
-gen-config-batch = "gen_config.batch:main"
-gen-config-dict = "gen_config.dictionary:main"
-gen-config-analyse = "gen_config.histograms:main"
-gen-config-vis = "gen_config.visualiser:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
