@@ -27,7 +27,65 @@ def diff_eq(avgd, asym):
         avgd.loc[i, 1] = asym[0].iloc[dum_list.index(min(dum_list))]
         avgd.loc[i, 2] = asym[1].iloc[dum_list.index(min(dum_list))]
         avgd.loc[i, 3] = asym[2].iloc[dum_list.index(min(dum_list))]
-            
+
+
+def matrix_to_string(matrix, header=None):
+    # NEXT LINES TAKEN FROM WEB - They create a nice table output for the data
+    if type(header) is list:
+        header = tuple(header)
+    lengths = []
+    if header:
+        for column in header:
+            lengths.append(len(column))
+    for row in matrix:
+        for column in row:
+            i = row.index(column)
+            column = str(column)
+            cl = len(column)
+            try:
+                ml = lengths[i]
+                if cl > ml:
+                    lengths[i] = cl
+            except IndexError:
+                lengths.append(cl)
+    lengths = tuple(lengths)
+    format_string = ""
+    for length in lengths:
+        format_string += "%-" + str(length) + "s "
+    format_string += "\n"
+    matrix_str = ""
+    if header:
+        matrix_str += format_string % header
+    for row in matrix:
+        matrix_str += format_string % tuple(row)
+    return matrix_str
+
+
+def modulo_sep(numb,base,comp):
+    # Separates a normal integer into its base components (for a given base and number of components)
+    A=[]
+    num_work=numb
+    while num_work > 0:
+        rem = num_work % base
+        num_work = (num_work - rem)/base
+        A.insert(0,rem)
+    while len(A) < comp:
+        A.insert(0,0)
+    return A
+def modulo_comb(set,base,comp):
+    # Recombines a separated base into a normal integer
+    num=0
+    for n in range(len(set)):
+        num+=set[n]*(base**(comp-1-n))
+    return num
+def reduce_comp(A,B):
+    # Allows for a numbers to be made equivalent to each other
+    # A is the original set
+    # B is the equivalency
+    A1=[]
+    for n in A:
+        A1.append(B[n])
+    return A1
 
 
 def run(dict_dir, sublattice=None, rmc6f=None):
@@ -172,66 +230,9 @@ def run(dict_dir, sublattice=None, rmc6f=None):
 
     #%%
     ###################################################
-    #### DEFINING FUNCTIONS
+    #### matrix_to_string / modulo_sep / modulo_comb / reduce_comp are now module-level
+    #### functions (see the top of this file) so they're importable/testable on their own.
     ###################################################
-    def matrix_to_string(matrix, header=None):
-     	# NEXT LINES TAKEN FROM WEB - They create a nice table output for the data
-        if type(header) is list:
-            header = tuple(header)
-        lengths = []
-        if header:
-            for column in header:
-                lengths.append(len(column))
-        for row in matrix:
-            for column in row:
-                i = row.index(column)
-                column = str(column)
-                cl = len(column)
-                try:
-                    ml = lengths[i]
-                    if cl > ml:
-                        lengths[i] = cl
-                except IndexError:
-                    lengths.append(cl)
-        lengths = tuple(lengths)
-        format_string = ""
-        for length in lengths:
-            format_string += "%-" + str(length) + "s "
-        format_string += "\n"
-        matrix_str = ""
-        if header:
-            matrix_str += format_string % header
-        for row in matrix:
-            matrix_str += format_string % tuple(row)
-        return matrix_str
-
-
-    def modulo_sep(numb,base,comp):
-     	# Separates a normal integer into its base components (for a given base and number of components)
-     	A=[]
-     	num_work=numb
-     	while num_work > 0:
-             rem = num_work % base
-             num_work = (num_work - rem)/base
-             A.insert(0,rem)
-     	while len(A) < comp:
-             A.insert(0,0)
-     	return A
-    def modulo_comb(set,base,comp):
-     	# Recombines a separated base into a normal integer
-     	num=0
-     	for n in range(len(set)):
-             num+=set[n]*(base**(comp-1-n))
-     	return num
-    def reduce_comp(A,B):
-     	# Allows for a numbers to be made equivalent to each other
-     	# A is the original set
-     	# B is the equivalency
-     	A1=[]
-     	for n in A:
-             A1.append(B[n])
-     	return A1
-    ####################################################
     #%%
 
     ####################
@@ -712,10 +713,36 @@ def run(dict_dir, sublattice=None, rmc6f=None):
     ##############################
     ######## SAVE PLOTS
     ##############################
- 	
+
     import matplotlib.pyplot as plt
 
+    def _pseudo_binary_label(n1):
+        """
+        Names the two sides of pseudo-binary partition n1 (1-indexed) in terms of the real
+        element symbols on each side, using the exact same modulo_sep(n1, 2, no_types_new)
+        grouping the enhancement-factor counting above already uses - so the label is
+        guaranteed to describe what the numbers actually mean, not a separate guess at it.
+
+        Returns (title, group_a_names, group_b_names). `title` is just the single species
+        name when one side of the partition is a lone element (e.g. "Cr" for Cr vs Ni-Co,
+        since the complement is unambiguous); otherwise both sides are spelled out
+        (e.g. "Ni-Cr : Co-Fe").
+        """
+        red = modulo_sep(n1, 2, no_types_new)
+        group_a = [at_labels[inv_mapping[i]] for i in range(no_types_new) if red[i] == 0]
+        group_b = [at_labels[inv_mapping[i]] for i in range(no_types_new) if red[i] == 1]
+
+        if min(len(group_a), len(group_b)) == 1:
+            title = group_a[0] if len(group_a) == 1 else group_b[0]
+        else:
+            title = '-'.join(group_a) + ' : ' + '-'.join(group_b)
+
+        return title, group_a, group_b
+
     for m1 in range(cond_num):
+     	partition_title, _group_a, _group_b = _pseudo_binary_label(m1 + 1)
+     	label_a = '-'.join(_group_a)
+     	label_b = '-'.join(_group_b)
      	xDATvalues=[]
      	yDATvalues=[]
      	xDATAvalues=[]
@@ -735,6 +762,9 @@ def run(dict_dir, sublattice=None, rmc6f=None):
      	plt.axis([binom_df[0].iloc[0],binom_df[0].iloc[-1],min(yDATvalues)-0.5,max(yDATvalues)+0.5])
      	plt.axhline(y=3, color='black', linestyle='dashed', linewidth=1)
      	plt.axhline(y=-3, color='black', linestyle='dashed', linewidth=1)
+     	plt.title(partition_title)
+     	plt.xlabel("Configuration (CC)")
+     	plt.ylabel("Enhancement Factor (Ψ)")
      	plt.savefig(filename_stem+"_"+str(m1+1)+"C_sub"+str(sub_num)+"_EF.png")
      	#plt.show()
      	plt.close()
@@ -744,6 +774,9 @@ def run(dict_dir, sublattice=None, rmc6f=None):
      	plt.axis([binom_df[0].iloc[0],binom_df[0].iloc[-1],min(yDATAvalues)-0.5,max(yDATAvalues)+0.5])
      	plt.axhline(y=3, color='black', linestyle='dashed', linewidth=1)
      	plt.axhline(y=-3, color='black', linestyle='dashed', linewidth=1)
+     	plt.title(partition_title+"\ncentred on "+label_a)
+     	plt.xlabel("Configuration (CC)")
+     	plt.ylabel("Enhancement Factor (Ψ)")
      	plt.savefig(filename_stem+"_"+str(m1+1)+"C_sub"+str(sub_num)+"_EF_A.png")
      	plt.close()
      	#
@@ -752,12 +785,15 @@ def run(dict_dir, sublattice=None, rmc6f=None):
      	plt.axis([binom_df[0].iloc[0],binom_df[0].iloc[-1],min(yDATBvalues)-0.5,max(yDATBvalues)+0.5])
      	plt.axhline(y=3, color='black', linestyle='dashed', linewidth=1)
      	plt.axhline(y=-3, color='black', linestyle='dashed', linewidth=1)
+     	plt.title(partition_title+"\ncentred on "+label_b)
+     	plt.xlabel("Configuration (CC)")
+     	plt.ylabel("Enhancement Factor (Ψ)")
      	plt.savefig(filename_stem+"_"+str(m1+1)+"C_sub"+str(sub_num)+"_EF_B.png")
      	plt.close()
      	#
      	plt.figure()
-     	plt.bar(xDATAvalues,yDATAvalues,color='blue')
-     	plt.bar(xDATBvalues,yDATBvalues,color='green')
+     	plt.bar(xDATAvalues,yDATAvalues,color='blue',label=label_a)
+     	plt.bar(xDATBvalues,yDATBvalues,color='green',label=label_b)
      	if max(yDATAvalues)>=max(yDATBvalues):
              if min(yDATAvalues)<=min(yDATBvalues):
                  plt.axis([binom_df[0].iloc[0],binom_df[0].iloc[-1],min(yDATAvalues)-0.5,max(yDATAvalues)+0.5])
@@ -770,6 +806,10 @@ def run(dict_dir, sublattice=None, rmc6f=None):
                  plt.axis([binom_df[0].iloc[0],binom_df[0].iloc[-1],min(yDATBvalues)-0.5,max(yDATBvalues)+0.5])
      	plt.axhline(y=3, color='black', linestyle='dashed', linewidth=1)
      	plt.axhline(y=-3, color='black', linestyle='dashed', linewidth=1)
+     	plt.title(partition_title)
+     	plt.xlabel("Configuration (CC)")
+     	plt.ylabel("Enhancement Factor (Ψ)")
+     	plt.legend()
      	plt.savefig(filename_stem+"_"+str(m1+1)+"C_sub"+str(sub_num)+"_EF_AB.png")
      	plt.close()
 
