@@ -72,12 +72,13 @@ def Polar_dict(cartesian_frame, a, b, c, alpha, beta, gamma, col1='x', col2='y',
     cartesian_frame[col2] = Y
     cartesian_frame[col3] = Z
     
+    zero_tol = 1e-5  # was `1**(-5)`, which evaluates to 1.0 in Python (any power of 1 is 1) rather than the intended 1e-5 tolerance
     for i in range(len(cartesian_frame)):
-        if (cartesian_frame[col1][i] < 1**(-5)) and (cartesian_frame[col1][i] > -1**(-5)):
+        if (cartesian_frame[col1][i] < zero_tol) and (cartesian_frame[col1][i] > -zero_tol):
             cartesian_frame.loc[i, col1] = 0.0
-        if (cartesian_frame[col2][i] < 1**(-5)) and (cartesian_frame[col2][i] > -1**(-5)):
+        if (cartesian_frame[col2][i] < zero_tol) and (cartesian_frame[col2][i] > -zero_tol):
             cartesian_frame.loc[i, col2] = 0.0
-        if (cartesian_frame[col3][i] < 1**(-5)) and (cartesian_frame[col3][i] > -1**(-5)):
+        if (cartesian_frame[col3][i] < zero_tol) and (cartesian_frame[col3][i] > -zero_tol):
             cartesian_frame.loc[i, col3] = 0.0
     
         
@@ -107,8 +108,17 @@ def clean_expression(expression):
     
     # Join the valid terms back together
     cleaned_expression = ''.join(valid_terms)
-    
+
     return cleaned_expression
+
+
+def parse_cif_numeric_value(line):
+    """
+    Extracts the numeric value from a CIF header line (e.g. '_cell_length_a   5.4310(2)\n'),
+    stripping any uncertainty brackets/whitespace, and returns it as a float.
+    """
+    raw = line.split()[1::2][0]
+    return float(re.sub(r"[()\n]", "", raw))
 
 
 #%%% Nearest Neighbours
@@ -122,13 +132,18 @@ def N_N(dictionary, no, cen_atom_dict):
                 min_val         - The distance of the nearest neighbours from the located atom (Type: Float)
                 Atom            - The index of the central atom (Type: Integer)
     """
-    Atom = round(0.5*len(dictionary[no])) #Find atom at roughly half way through dataframe
-    
-    while (dictionary[no]['x'].iloc[Atom] == 0.0) or (dictionary[no]['x'].iloc[Atom] == super_dim[0]*len_a) \
-        or (dictionary[no]['y'].iloc[Atom] == 0.0) or (dictionary[no]['y'].iloc[Atom] == super_dim[1]*len_b) \
-            or (dictionary[no]['z'].iloc[Atom] == 0.0) or (dictionary[no]['z'].iloc[Atom] == super_dim[2]*len_c):
-                Atom = Atom+1 #If atom along edge, add a few on to ensure it's an atom in the body
-                    
+    df = dictionary[no]
+    interior = df.index[
+        (df['x'] != 0.0) & (df['x'] != super_dim[0]*len_a) &
+        (df['y'] != 0.0) & (df['y'] != super_dim[1]*len_b) &
+        (df['z'] != 0.0) & (df['z'] != super_dim[2]*len_c)
+    ]  # Atoms not lying on a supercell boundary face
+
+    if len(interior) == 0:
+        raise ValueError(f"Sub-lattice {no}: every atom lies on a supercell boundary face - cannot find an interior atom to centre the nearest-neighbour search on.")
+
+    Atom = interior[round(0.5*len(interior))]  #Pick an atom at roughly the halfway point among interior atoms
+
     cen_atom_dict[no] = pd.DataFrame(dictionary[no].iloc[Atom])
     
     dictionary[no]['r']=""
@@ -249,71 +264,28 @@ for line in lines:
         it_no = [int(i) for i in line.split() if i.isdigit()]
         print('IT no.:', it_no[0])
     
-    elif '_cell_length_a' in line: #Finds and prints space group by identifying line with space group text, then finding the characters BETWEEN the apostrophes
-        cell_len_a = line.split()[1::2]
-        if "(" in cell_len_a[0]:
-            cell_len_a[0] = cell_len_a[0].replace("(", "")
-        if ")" in cell_len_a[0]:
-            cell_len_a[0] = cell_len_a[0].replace(")", "")
-        if "\n" in cell_len_a[0]:
-            cell_len_a[0] = cell_len_a[0].replace("\n", "")
-        len_a = float(cell_len_a[0])
+    elif '_cell_length_a' in line: #Cell length/angle values, incl. any CIF uncertainty brackets e.g. 5.4310(2)
+        len_a = parse_cif_numeric_value(line)
         print('Cell Length a: ', len_a, 'Ang')
-    
-    elif '_cell_length_b' in line: #Finds and prints space group by identifying line with space group text, then finding the characters BETWEEN the apostrophes
-        cell_len_b = line.split()[1::2]
-        if "(" in cell_len_b[0]:
-            cell_len_b[0] = cell_len_b[0].replace("(", "")
-        if ")" in cell_len_b[0]:
-            cell_len_b[0] = cell_len_b[0].replace(")", "")
-        if "\n" in cell_len_b[0]:
-            cell_len_b[0] = cell_len_b[0].replace("\n", "")
-        len_b = float(cell_len_b[0])
+
+    elif '_cell_length_b' in line:
+        len_b = parse_cif_numeric_value(line)
         print('Cell Length b: ', len_b, 'Ang')
-    
-    elif '_cell_length_c' in line: #Finds and prints space group by identifying line with space group text, then finding the characters BETWEEN the apostrophes
-        cell_len_c = line.split()[1::2]
-        if "(" in cell_len_c[0]:
-            cell_len_c[0] = cell_len_c[0].replace("(", "")
-        if ")" in cell_len_c[0]:
-            cell_len_c[0] = cell_len_c[0].replace(")", "")
-        if "\n" in cell_len_c[0]:
-            cell_len_c[0] = cell_len_c[0].replace("\n", "")
-        len_c = float(cell_len_c[0])
+
+    elif '_cell_length_c' in line:
+        len_c = parse_cif_numeric_value(line)
         print('Cell Length c: ', len_c, 'Ang')
-    
-    elif '_cell_angle_alpha' in line: #Finds and prints space group by identifying line with space group text, then finding the characters BETWEEN the apostrophes
-        angle_a = line.split()[1::2]
-        if "(" in angle_a[0]:
-            angle_a[0] = angle_a[0].replace("(", "")
-        if ")" in angle_a[0]:
-            angle_a[0] = angle_a[0].replace(")", "")
-        if "\n" in angle_a[0]:
-            angle_a[0] = angle_a[0].replace("\n", "")
-        ang_a = float(angle_a[0])
+
+    elif '_cell_angle_alpha' in line:
+        ang_a = parse_cif_numeric_value(line)
         print('Angle alpha: ', ang_a, 'deg')
-        
-    elif '_cell_angle_beta' in line: #Finds and prints space group by identifying line with space group text, then finding the characters BETWEEN the apostrophes
-        angle_b = line.split()[1::2]
-        if "(" in angle_b[0]:
-            angle_b[0] = angle_b[0].replace("(", "")
-        if ")" in angle_b[0]:
-            angle_b[0] = angle_b[0].replace(")", "")
-        if "\n" in angle_b[0]:
-            angle_b[0] = angle_b[0].replace("\n", "")
-        ang_b = float(angle_b[0])
+
+    elif '_cell_angle_beta' in line:
+        ang_b = parse_cif_numeric_value(line)
         print('Angle beta: ', ang_b, 'deg')
-        
-    
-    elif '_cell_angle_gamma' in line: #Finds and prints space group by identifying line with space group text, then finding the characters BETWEEN the apostrophes
-        angle_c = line.split()[1::2]
-        if "(" in angle_c[0]:
-            angle_c[0] = angle_c[0].replace("(", "")
-        if ")" in angle_c[0]:
-            angle_c[0] = angle_c[0].replace(")", "")
-        if "\n" in angle_c[0]:
-            angle_c[0] = angle_c[0].replace("\n", "")
-        ang_c = float(angle_c[0])
+
+    elif '_cell_angle_gamma' in line:
+        ang_c = parse_cif_numeric_value(line)
         print('Angle gamma: ', ang_c, 'deg')
     
         
@@ -381,8 +353,6 @@ for col in range(len(coord_df.columns)): #This section of code removes brackets 
 sym_ops_df = pd.DataFrame(sym_ops, columns=['Symmetry Operations']) #Created dataframe
 
 D = {} #Create dictionary
-
-colours = ['firebrick', 'deepskyblue', 'limegreen', 'gold', 'black', 'lightcoral', 'blueviolet', 'aquamarine', 'wheat', 'darkgrey', 'darkblue', 'tomato', 'orange', 'pink', 'yellow'] #Setting up a colours list that can be looped through
 
 store_chem_index = {}
 
@@ -465,17 +435,6 @@ print("Unit Cell Positions have been saved (.cellpos).")
     
     
             
-#%% Plot asymmetric unit cell as is
-
-# fig = plt.figure()
-# ax = plt.axes(projection='3d')
-
-# for h in range(len(asym_unitcell)):
-#     ax.scatter3D(asym_unitcell[h]['x'], asym_unitcell[h]['y'], asym_unitcell[h]['z'], c = colours[h], s=800) #Runs through each dictionary item, plots the x y and z coordinates as points
-# set_axes_equal(ax)
-# plt.show()
-
-
 #%% Continue making Unit Cell
 
 unitcell =copy.deepcopy(asym_unitcell)
@@ -531,17 +490,6 @@ for k in range(len(unitcell_dict)):
     unitcell_dict_final[k].reset_index(drop=True, inplace=True) 
 
     
-#%% Plot Unit Cell
-
-# fig_test_fin = plt.figure()
-# ax_test_fin = plt.axes(projection='3d')
-# for k in range(len(unitcell_dict_final)):
-#     ax_test_fin.scatter3D(unitcell_dict_final[k]['x'], unitcell_dict_final[k]['y'], unitcell_dict_final[k]['z'], c=colours[k], s=800)
-
-# set_axes_equal(ax_test_fin)
-# plt.show()
-
-
 #%% Create and save dataframes for supercell
 
 supercell = unitcell_dict_final.copy()
@@ -561,12 +509,12 @@ atom_name_storage = list(coord_df[1])
 
 
 if len(coord_df) > 1:
-    answer = input("\nWould you like to set any lattice-site equivalences? (Y/N):\t")
-    
-    if answer == 'N' or answer == 'n':
+    answer = input("\nWould you like to set any lattice-site equivalences? (Y/N):\t").strip().upper()
+
+    if answer == 'N':
         pass
-    elif answer == 'Y' or answer == 'y':
-        
+    elif answer == 'Y':
+
         while exit_condition == 0:
             
             answer_2 = input("Select equivalent atomic sublattices, in the form '0,1,2,...,N':\t")
@@ -588,9 +536,9 @@ if len(coord_df) > 1:
             merge_df.drop(['index'], axis=1,inplace=True)
             supercell[len(supercell)] = merge_df
             
-            answer_3 = input('Would you like to select another equivalency? (Y/N):\t')
-            
-            if answer_3 =='y' or answer_3 =='Y':
+            answer_3 = input('Would you like to select another equivalency? (Y/N):\t').strip().upper()
+
+            if answer_3 == 'Y':
                 continue
             else:
                 super_answer_merge = list(itertools.chain.from_iterable(super_answer))
@@ -611,7 +559,7 @@ else:
 atom_name = pd.DataFrame(atom_name_storage)
 
 
-if (len(coord_df)>1) and (answer == 'Y') or (answer == 'y'):
+if (len(coord_df) > 1) and (answer == 'Y'):
     for i in super_answer_merge:
         atom_name = atom_name.drop(i)
     
@@ -658,7 +606,7 @@ for atom_type, atom_df in supercell.items(): # Iterate through the 'supercell' d
     supercell_dict[atom_type].drop_duplicates()
     
 
-#%% Supercell plot 2
+#%%
 
 supercell_new = {}
 for k in range(len(supercell_dict)):
@@ -673,27 +621,6 @@ for k in range(len(supercell_dict)):
 
 #%%
 
-# fig_tesTY = plt.figure()
-# ax_tesTY = plt.axes(projection='3d')
-# for try1 in range(len(supercell_dict)):
-#     ax_tesTY.scatter3D(supercell_dict[try1]['x'], supercell_dict[try1]['y'], supercell_dict[try1]['z'], c = colours[try1], s=800)
-
-# set_axes_equal(ax_tesTY)    
-# plt.show()
-
-
-#%% Show sublattices
-
-# for k in range(len(supercell_new)):
-#     fig_test1 = plt.figure()
-#     ax_test1 = plt.axes(projection='3d')
-#     ax_test1.scatter3D(supercell_new[k]['x'], supercell_new[k]['y'], supercell_new[k]['z'], c=colours[k], s=800)
-#     set_axes_equal(ax_test1)
-#     plt.show()
-    
-
-#%%
-
 supercell_storage = copy.deepcopy(supercell_new)
 
 for i in range(len(supercell_new)):
@@ -703,14 +630,6 @@ for i in range(len(supercell_new)):
 
 for k in range(len(supercell_new)):
     supercell_new[k] = Polar_dict(supercell_new[k], len_a, len_b, len_c, ang_a, ang_b, ang_c)
-
-# for k in range(len(supercell_new)):
-#     fig_tester = plt.figure()
-#     ax_tester = plt.axes(projection='3d')
-#     ax_tester.scatter3D(supercell_new[k]['x'], supercell_new[k]['y'], supercell_new[k]['z'], c=colours[k], s=800)
-#     set_axes_equal(ax_tester)
-#     plt.show()
-    
 
 #%%Nearest Neighbours
 
@@ -783,27 +702,14 @@ for k in range(len(cen_atom)):
     cen_atom[k].columns = range(cen_atom[k].columns.size)
     cen_atom[k].reset_index(inplace=True)
     cen_atom[k].drop(['index'], axis=1,inplace=True)
-    cen_atom[k] = cen_atom[k].transpose()    
-    
-    # NN_fig = plt.figure()
-    # axis = plt.axes(projection='3d')
-    # for m in range(len(N_N_List_super[k])):
-    #     axis.scatter3D(N_N_List_super[k][0].iloc[m], N_N_List_super[k][1].iloc[m], N_N_List_super[k][2].iloc[m], c=colours[k], s=800)
-    # set_axes_equal(axis)
-    # plt.show()
-    
-
+    cen_atom[k] = cen_atom[k].transpose()
 
 #%%
 
 Frac_Supercell = {}
 
 for i in range(len(cols_list)):
-    df = pd.DataFrame()
-    for k in range(len(cols_list[i])):
-        row = supercell_storage[i][supercell_storage[i].index == cols_list[i][k]]
-        df = pd.concat([df, row])
-    Frac_Supercell[i] = df
+    Frac_Supercell[i] = supercell_storage[i].loc[cols_list[i]]  # single indexed lookup instead of rescanning the whole supercell per NN atom
 
 for k in range(len(Frac_Supercell)):
     Frac_Supercell[k].columns = range(Frac_Supercell[k].columns.size)
@@ -875,7 +781,7 @@ NN_v_transform = copy.deepcopy(NN_v)
 
 #%% Resolve origin issue when merging lattices
 
-if answer == 'Y' or answer == 'y':
+if answer == 'Y':
     
     
     for i in range(len(super_answer)):
@@ -917,52 +823,28 @@ for number in range(len(NN_v)):
             y=Origin_dump['y']
             z=Origin_dump['z']
             
-            if ('x' in sym_ops_NN[k][j]) and ('-x' not in sym_ops_NN[k][j]):
-                result = eval(sym_ops_NN[k][j])
-                Origin_sym_dump[k] = result
-            elif ('y' in sym_ops_NN[k][j]) and ('-y' not in sym_ops_NN[k][j]):
-                result = eval(sym_ops_NN[k][j])
-                Origin_sym_dump[k] = result
-            elif ('z' in sym_ops_NN[k][j]) and ('-z' not in sym_ops_NN[k][j]):
-                result = eval(sym_ops_NN[k][j])
-                Origin_sym_dump[k] = result
-            elif ('-x' in sym_ops_NN[k][j]):
-                result = eval(sym_ops_NN[k][j])
-                Origin_sym_dump[k] = result
-            elif ('-y' in sym_ops_NN[k][j]):
-                result = eval(sym_ops_NN[k][j])
-                Origin_sym_dump[k] = result
-            elif ('-z' in sym_ops_NN[k][j]):
+            # Every branch below evaluated the identical `eval(sym_ops_NN[k][j])` regardless of
+            # which axis letter (or sign) matched - the only real question is whether an x/y/z
+            # variable is present at all, so that's collapsed to one guard.
+            if any(letter in sym_ops_NN[k][j] for letter in ('x', 'y', 'z')):
                 result = eval(sym_ops_NN[k][j])
                 Origin_sym_dump[k] = result
             else:
                 break
             
-        for add in [1]:    
-            if (Origin_sym_dump['x'][0] == Origin_dump['x'][0]) and (Origin_sym_dump['y'][0] == Origin_dump['y'][0]) and (Origin_sym_dump['z'][0] == Origin_dump['z'][0]):
+        # Checks whether the symmetry-transformed position matches the original atom position
+        # up to a +1 lattice translation independently on each axis (periodic boundary: an atom
+        # at fractional coordinate 0 and one at 1 along the same axis are the same site). The
+        # 8 branches below were every combination of "add 1 or don't" across x/y/z - collapsed
+        # to a loop over those same 8 (0/1) offset combinations.
+        add = 1
+        for offset in itertools.product([0, add], repeat=3):
+            if (offset[0] + Origin_sym_dump['x'][0] == Origin_dump['x'][0]) and \
+               (offset[1] + Origin_sym_dump['y'][0] == Origin_dump['y'][0]) and \
+               (offset[2] + Origin_sym_dump['z'][0] == Origin_dump['z'][0]):
                 symmetry_collect.append([sym_ops_NN['x'].iloc[j], sym_ops_NN['y'].iloc[j], sym_ops_NN['z'].iloc[j]])
-            
-            elif (add + Origin_sym_dump['x'][0] == Origin_dump['x'][0]) and (Origin_sym_dump['y'][0] == Origin_dump['y'][0]) and (Origin_sym_dump['z'][0] == Origin_dump['z'][0]):
-                symmetry_collect.append([sym_ops_NN['x'].iloc[j], sym_ops_NN['y'].iloc[j], sym_ops_NN['z'].iloc[j]])
-            
-            elif (Origin_sym_dump['x'][0] == Origin_dump['x'][0]) and (add + Origin_sym_dump['y'][0] == Origin_dump['y'][0]) and (Origin_sym_dump['z'][0] == Origin_dump['z'][0]):
-                symmetry_collect.append([sym_ops_NN['x'].iloc[j], sym_ops_NN['y'].iloc[j], sym_ops_NN['z'].iloc[j]])
-            
-            elif (Origin_sym_dump['x'][0] == Origin_dump['x'][0]) and (Origin_sym_dump['y'][0] == Origin_dump['y'][0]) and (add + Origin_sym_dump['z'][0] == Origin_dump['z'][0]):
-                symmetry_collect.append([sym_ops_NN['x'].iloc[j], sym_ops_NN['y'].iloc[j], sym_ops_NN['z'].iloc[j]])
-            
-            elif (add + Origin_sym_dump['x'][0] == Origin_dump['x'][0]) and (add + Origin_sym_dump['y'][0] == Origin_dump['y'][0]) and (Origin_sym_dump['z'][0] == Origin_dump['z'][0]):
-                symmetry_collect.append([sym_ops_NN['x'].iloc[j], sym_ops_NN['y'].iloc[j], sym_ops_NN['z'].iloc[j]])
-            
-            elif (add + Origin_sym_dump['x'][0] == Origin_dump['x'][0]) and (Origin_sym_dump['y'][0] == Origin_dump['y'][0]) and (add + Origin_sym_dump['z'][0] == Origin_dump['z'][0]):
-                symmetry_collect.append([sym_ops_NN['x'].iloc[j], sym_ops_NN['y'].iloc[j], sym_ops_NN['z'].iloc[j]])
-            
-            elif (Origin_sym_dump['x'][0] == Origin_dump['x'][0]) and (add + Origin_sym_dump['y'][0] == Origin_dump['y'][0]) and (add + Origin_sym_dump['z'][0] == Origin_dump['z'][0]):
-                symmetry_collect.append([sym_ops_NN['x'].iloc[j], sym_ops_NN['y'].iloc[j], sym_ops_NN['z'].iloc[j]])
-            
-            elif (add + Origin_sym_dump['x'][0] == Origin_dump['x'][0]) and (add + Origin_sym_dump['y'][0] == Origin_dump['y'][0]) and (add + Origin_sym_dump['z'][0] == Origin_dump['z'][0]):
-                symmetry_collect.append([sym_ops_NN['x'].iloc[j], sym_ops_NN['y'].iloc[j], sym_ops_NN['z'].iloc[j]])
-        
+                break
+
     
     symmetry_collect = pd.DataFrame(symmetry_collect)
     symmetry_collect.rename(columns={0: "x", 1: "y", 2:"z"}, inplace=True)
@@ -982,38 +864,13 @@ for number in range(len(NN_v)):
             y=NN_v_transform[number][1]
             z=NN_v_transform[number][2]
             
-            if ('x' in symmetry_collect[k][j]) and ('-x' not in symmetry_collect[k][j]):
-                
+            # See the equivalent branch above (Origin_sym_dump loop) - every branch here was
+            # also the identical `eval(symmetry_collect[k][j])`, so collapsed to one guard.
+            if any(letter in symmetry_collect[k][j] for letter in ('x', 'y', 'z')):
                 result = eval(symmetry_collect[k][j])
                 NN_sym_dump[k] = result
-                
-            elif ('y' in symmetry_collect[k][j]) and ('-y' not in symmetry_collect[k][j]):
-                
-                result = eval(symmetry_collect[k][j])
-                NN_sym_dump[k] = result
-                
-            elif ('z' in symmetry_collect[k][j]) and ('-z' not in symmetry_collect[k][j]):
-                
-                result = eval(symmetry_collect[k][j])
-                NN_sym_dump[k] = result
-                
-            elif ('-x' in symmetry_collect[k][j]):
-                
-                result = eval(symmetry_collect[k][j])
-                NN_sym_dump[k] = result
-                
-            elif ('-y' in symmetry_collect[k][j]):
-                
-                result = eval(symmetry_collect[k][j])
-                NN_sym_dump[k] = result
-                
-            elif ('-z' in symmetry_collect[k][j]):
-                
-                result = eval(symmetry_collect[k][j])
-                NN_sym_dump[k] = result
-                
             else:
-                break    
+                break
 
 
         for k in range(len(NN_sym_dump)):
@@ -1285,7 +1142,7 @@ for i in range(len(CC_dict)):
     CC_dict[i] = pd.DataFrame(CC_dict[i])
     for j in range(len(CC_dict[i])):
         for k in range(len(CC_dict[i].iloc[j])):
-            if CC_dict[i].iloc[j][k] == None:
+            if CC_dict[i].iloc[j][k] is None:  # padding from pd.DataFrame() on ragged rows of lists
                 pass
             else:
                 CC_dict[i].loc[j,k] = ''.join(map(str, CC_dict[i].iloc[j,k]))
@@ -1337,7 +1194,7 @@ for num in range(len(CC_dict)):
     for i in range(len(CC_dict[num])):
         for j in range(len(CC_dict[num].iloc[i])-1):
     
-            if CC_dict[num].iloc[i][j] == None:
+            if CC_dict[num].iloc[i][j] is None:  # padding from pd.DataFrame() on ragged rows of lists
                 continue
             else:
                 dec_list.append(CC_dict[num].iloc[i][j])

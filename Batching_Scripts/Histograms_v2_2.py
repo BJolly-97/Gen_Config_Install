@@ -42,11 +42,15 @@ def diff_eq(avgd, asym):
 filepath = input("Input Dictionaries Directory:\t")
 filepath = filepath.strip('"')
 
+sublattice_labels = None
 for stemname in os.listdir(filepath):
     if stemname.endswith('.finsub'):
         sublattice_labels = stemname
 
-sublab_file = open(filepath+"\\"+sublattice_labels, "r")
+if sublattice_labels is None:
+    raise FileNotFoundError(f"No '.finsub' file found in '{filepath}'. Run 'dict' first to generate the dictionary files.")
+
+sublab_file = open(os.path.join(filepath, sublattice_labels), "r")
 sublab_read = sublab_file.readlines()
 sublab_file.close()
 
@@ -71,6 +75,9 @@ for stemname in os.listdir(filepath):
     if stemname.endswith(".cfgdict"+sub_num):
         clapp_ext = stemname
 
+if basis_ext is None or binom_ext is None or clapp_ext is None:
+    raise FileNotFoundError(f"No '.basis{sub_num}'/'.binom{sub_num}'/'.cfgdict{sub_num}' files found in '{filepath}' for sub-lattice {sub_num}.")
+
 #%%
 
 sublab = sublab[0].str.split('\t',expand=True)
@@ -86,17 +93,17 @@ for i in range(len(sublab)):
 
 #%%
 
-basis = open(filepath+"\\"+basis_ext, "r")
+basis = open(os.path.join(filepath, basis_ext), "r")
 basis_line_read = basis.readlines()
 basis.close()
 basis_lines = basis_line_read.copy()
 
-binom = open(filepath+"\\"+binom_ext, "r")
+binom = open(os.path.join(filepath, binom_ext), "r")
 binom_line_read = binom.readlines()
 binom.close()
 binom_lines = binom_line_read.copy()
 
-config = open(filepath+"\\"+clapp_ext, "r")
+config = open(os.path.join(filepath, clapp_ext), "r")
 config_line_read = config.readlines()
 config.close()
 config_lines = config_line_read.copy()
@@ -133,9 +140,13 @@ config_df = config_df.astype(int)
 
 #%%
 
+asym_file = None
 for stemname in os.listdir(filepath):
     if stemname.endswith(".cellpos"):
-        asym_file = filepath+"\\"+stemname
+        asym_file = os.path.join(filepath, stemname)
+
+if asym_file is None:
+    raise FileNotFoundError(f"No '.cellpos' file found in '{filepath}'. Run 'dict' first to generate the dictionary files.")
 
 asym_file = asym_file.strip('"')
 
@@ -311,10 +322,8 @@ master_df_main =pd.DataFrame(raw_file[a_c_i+1:])
 master_df_main.drop([0,2], axis=1, inplace=True)
 master_df_main.columns=range(master_df_main.shape[1])
 
-for i in tqdm(range(len(master_df_main)), desc="Generating dataframe from .rmc6f"):
-    for j in range(len(at_labels)):
-        if master_df_main[0].iloc[i] == at_labels[j]:
-            master_df_main.loc[i, 0] = j
+label_to_index = {label: j for j, label in enumerate(at_labels)}
+master_df_main[0] = master_df_main[0].map(label_to_index)
 
 for i in [0,4,5,6,7]:
     master_df_main[i]=master_df_main[i].astype(int)
@@ -349,6 +358,7 @@ if len(uniq_types2) == 1:
 #%% Re-mapping atom types on sub-lattices
 
 mapping = {old: new for new, old in enumerate(uniq_types2)}
+inv_mapping = {new: old for old, new in mapping.items()}  # to recover original at_labels index later (e.g. for the _mb.rmc6f writer)
 
 # Apply the mapping to relabel the column
 master_df[0] = master_df[0].map(mapping)
@@ -587,11 +597,7 @@ for i in [1,2,3]:
     del mb_df[i+7]
 
 
-inserts = []
-for i in range(len(mb_df)):
-    for j in range(len(at_labels)):
-        if mb_df.loc[i,0] == j:
-            inserts.append(at_labels[j])
+inserts = [at_labels[inv_mapping[idx]] for idx in mb_df[0]]
             
 
 mb_df.insert(0, "NewCol", inserts)

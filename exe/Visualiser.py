@@ -22,11 +22,15 @@ print("====================================================================\n")
 filepath = input("Input Directory:\t")
 filepath = filepath.strip('"')
 
+sublattice_labels = None
 for stemname in os.listdir(filepath):
     if stemname.endswith('.finsub'):
         sublattice_labels = stemname
 
-sublab_file = open(filepath+"\\"+sublattice_labels, "r")
+if sublattice_labels is None:
+    raise FileNotFoundError(f"No '.finsub' file found in '{filepath}'. Run 'dict' first to generate the dictionary files.")
+
+sublab_file = open(os.path.join(filepath, sublattice_labels), "r")
 sublab_read = sublab_file.readlines()
 sublab_file.close()
 
@@ -43,15 +47,18 @@ while exit_cond == 0:
     
     basis_ext = None
     clapp_ext = None
-    
+
     # Loop through files in the folder
     for stemname in os.listdir(filepath):
         if stemname.endswith(".basis"+sub_num):
             basis_ext = stemname
         if stemname.endswith(".cfgdict"+sub_num):
             clapp_ext = stemname
-    
-    basis = open(filepath+"\\"+basis_ext, "r")
+
+    if basis_ext is None or clapp_ext is None:
+        raise FileNotFoundError(f"No '.basis{sub_num}'/'.cfgdict{sub_num}' files found in '{filepath}' for sub-lattice {sub_num}.")
+
+    basis = open(os.path.join(filepath, basis_ext), "r")
     
     line_read = basis.readlines()
     
@@ -65,13 +72,13 @@ while exit_cond == 0:
     basis_df = pd.DataFrame(lines)
     
     basis_df = basis_df[0].str.split('\\s+', expand = True)
-    basis_df.drop(columns=[0, 4, 5], axis=1, inplace=True)
+    basis_df.drop([0, 4, 5], axis=1, inplace=True)
     basis_df.rename(columns={1:'x', 2:'y', 3:'z',5:'Atom No.'}, inplace=True)
-    
-    
+
+
     #%%
-    
-    config_dict = open(filepath+"\\"+clapp_ext, "r")
+
+    config_dict = open(os.path.join(filepath, clapp_ext), "r")
     config_read = config_dict.readlines()
     
     config_dict.close()
@@ -84,16 +91,20 @@ while exit_cond == 0:
     input_config = input_config_list.split(',')
     
     for z in range(len(input_config)):
+        input_dec = None
         for n in range(len(config_df)):
             if config_df[1][n] == input_config[z]:
                 input_dec = int(config_df[0][n])
                 break
-            
-            
+
+        if input_dec is None:
+            print(f"\nConfiguration label '{input_config[z]}' not found for this sub-lattice - skipping.")
+            continue
+
         #%%
-        
+
         #input_dec = int(input("Decimal Number of Configuration from Dictionary:"))
-        
+
         input_bin = bin(input_dec)
         
         full_bin = input_bin[2:].zfill(len(basis_df))
@@ -126,10 +137,10 @@ while exit_cond == 0:
         
         plt.show()
 
-    A=input('\nContinue with visualisation for selected sublattice? (Y/N)\n')
-    if A == 'Y' or 'y':
+    A = input('\nContinue with visualisation for selected sublattice? (Y/N)\n').strip().upper()
+    if A == 'Y':
         pass
-    elif A == 'N' or 'n':
+    elif A == 'N':
         exit_cond+=1
     else:
         print('\nInvalid Input.\n')
