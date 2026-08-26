@@ -408,7 +408,7 @@ NN_list_df.columns=range(NN_list_df.shape[1])
 
 #%%
 
-NN_list_df[4] = ""
+NN_list_df[4] = None  # not "" - as of pandas 3.x that would create a strict string-dtype column, and this cell later holds a list (see the Modulo_comb section below)
 
 # Precompute combinations of NN_list_df columns 1, 2, and 3 into tuples for fast lookup
 NN_combined = list(zip(NN_list_df[1], NN_list_df[2], NN_list_df[3]))
@@ -452,7 +452,7 @@ no_types_new = master_df[0].nunique()
     
 #%%Performing the modulo_comb on the newly generated lists
 
-NN_list_df[5] = ""
+NN_list_df[5] = None  # not "" - this cell holds an int (see astype(int) below); "" would create a strict string-dtype column on pandas 3.x and reject the int assignment
 
 for i in tqdm(range(len(NN_list_df)), desc='Modulo_comb'):
     NN_list_df.at[i, 4] = list(NN_list_df.loc[i, 4])
@@ -464,7 +464,7 @@ NN_list_df[5] =  NN_list_df[5].astype(int)
 
 #%%
 
-NN_list_df[6] = ""
+NN_list_df[6] = None  # not "" - this cell holds a list (see A1 below); "" would create a strict string-dtype column on pandas 3.x and reject the list assignment
 
 #Does the conversion from higher order configurations to binary Clapp configurations
 for n in tqdm(range(len(NN_list_df)), desc='Conversion from higher order configurations to binary configs:'):

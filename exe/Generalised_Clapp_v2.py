@@ -73,16 +73,11 @@ def Polar_dict(cartesian_frame, a, b, c, alpha, beta, gamma, col1='x', col2='y',
     cartesian_frame[col3] = Z
     
     zero_tol = 1e-5  # was `1**(-5)`, which evaluates to 1.0 in Python (any power of 1 is 1) rather than the intended 1e-5 tolerance
-    for i in range(len(cartesian_frame)):
-        if (cartesian_frame[col1][i] < zero_tol) and (cartesian_frame[col1][i] > -zero_tol):
-            cartesian_frame.loc[i, col1] = 0.0
-        if (cartesian_frame[col2][i] < zero_tol) and (cartesian_frame[col2][i] > -zero_tol):
-            cartesian_frame.loc[i, col2] = 0.0
-        if (cartesian_frame[col3][i] < zero_tol) and (cartesian_frame[col3][i] > -zero_tol):
-            cartesian_frame.loc[i, col3] = 0.0
-    
-        
-    return(cartesian_frame)    
+    for col in (col1, col2, col3):
+        near_zero = cartesian_frame[col].abs() < zero_tol
+        cartesian_frame.loc[near_zero, col] = 0.0
+
+    return(cartesian_frame)
 
 
 #%%%
@@ -146,15 +141,12 @@ def N_N(dictionary, no, cen_atom_dict):
 
     cen_atom_dict[no] = pd.DataFrame(dictionary[no].iloc[Atom])
     
-    dictionary[no]['r']=""
-    
-    for i in range(len(dictionary[no])):
-        dictionary[no].loc[i, 'r'] = round(np.sqrt( (dictionary[no].loc[i, 'x'] - dictionary[no].loc[Atom, 'x'])**2 + (dictionary[no].loc[i, 'y'] - dictionary[no].loc[Atom, 'y'])**2 + \
-                                                (dictionary[no].loc[i, 'z'] - dictionary[no].loc[Atom, 'z'])**2 ), 2) 
-            #This calculates the distance from the selected atom using r = sqrt(x^2 + y^2 +z^2), and uses that to locate the number of atoms with the shortest distance from
-            #the 'origin' atom in question
-    
-    dictionary[no]['r'] = dictionary[no]['r'].astype('float')
+    #This calculates the distance from the selected atom using r = sqrt(x^2 + y^2 +z^2), and uses that to locate the number of atoms with the shortest distance from
+    #the 'origin' atom in question
+    ax, ay, az = dictionary[no].loc[Atom, ['x', 'y', 'z']]
+    dictionary[no]['r'] = np.round(np.sqrt(
+        (dictionary[no]['x'] - ax)**2 + (dictionary[no]['y'] - ay)**2 + (dictionary[no]['z'] - az)**2
+    ), 2).astype('float')
     
     
     min_val = dictionary[no].loc[dictionary[no]['r']>0.0,'r'].min()
@@ -745,9 +737,11 @@ for i in range(len(NN_v)):
 
 
 for i in range(len(NN_v)):
-    NN_v[i]['Atom No.'] = ""
-    for j in range(len(NN_v[i])):
-        NN_v[i].loc[j, 'Atom No.'] = j+1 #Numbers the atoms of the basis set for use in nearest neighbour symmetry operations and the production of configurations
+    # Numbers the atoms of the basis set for use in nearest neighbour symmetry operations and the production of configurations.
+    # (Was `NN_v[i]['Atom No.'] = ""` then a per-row loop - as of pandas 3.x that "" initializes
+    # a strict string-dtype column, and assigning an int into it raises TypeError. Assigning the
+    # whole numbered range at once sidesteps that and is also faster.)
+    NN_v[i]['Atom No.'] = range(1, len(NN_v[i]) + 1)
 
 
 for i in range(len(NN_v)):
