@@ -381,14 +381,20 @@ def run(dict_dir, sublattice=None, rmc6f=None):
         master_df[i+7]=0
         master_df[i+7]+=(master_df[i]*U[i-1])-master_df[i+4]
 
-    # Wrap into the principal range around the atom's assigned home unit cell. An atom whose
-    # RMC-fitted (displaced) position crosses a periodic boundary relative to its recorded
-    # reference cell can come out of the subtraction above near +-1 instead of near 0; wrapping
-    # to the nearest integer preserves the true small displacement instead of discarding it
-    # (previously: `if disp > 1: disp = 0`, a one-sided clamp that zeroed the value outright and
-    # never handled the equivalent undershoot below 0).
-    for i in [1,2,3]:
-        master_df[i+7] = master_df[i+7] - master_df[i+7].round()
+    # Reverted back to the original one-sided clamp (2026-08-26). The periodic wrap tried
+    # here previously (`disp - round(disp)`) assumed this quantity was a fractional coordinate
+    # that legitimately crosses a periodic boundary by a small amount - but at this point it's
+    # a full-unit-cell-scale index offset, and genuine RMC displacement noise stays well under
+    # 1 unit cell. So a value > 1 here is an indexing artifact, not a real small displacement:
+    # confirmed empirically against the real 32,000-atom NiCoCr test data - the wrap silently
+    # shifted many atoms' reconstructed positions by a whole unit cell, which corrupted the
+    # per-site averaging below and made every neighbour-coordinate lookup fail (0 neighbours
+    # found for every atom, which is what was collapsing every histogram onto CC=1/-1). The
+    # original clamp gives all 32,000 atoms their correct 12 real neighbours.
+    for i in range(len(master_df)):
+        for j in [1,2,3]:
+            if master_df[j+7].iloc[i] > 1:
+                master_df.loc[i, j+7] = 0
 
 
     #%%Averaging the offsite displacements to find ideal lattice positions
