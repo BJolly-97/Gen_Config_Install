@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "gen-config"
+version = "1.0.0"
+description = "Generalised tool for Clapp-style configurational analysis of RMCProfile large-box atomic models"
+readme = "README.md"
+requires-python = ">=3.9"
+authors = [
+    { name = "Benjamin E. Jolly" },
+    { name = "Lewis R. Owen" },
+]
+dependencies = [
+    "numpy>=1.24",
+    "pandas>=2.0",
+    "matplotlib>=3.5",
+    "tqdm>=4.60",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7.0"]
+
+[project.scripts]
+gen-config = "gen_config.cli:main"
+gen-config-batch = "gen_config.batch:main"
+gen-config-dict = "gen_config.dictionary:main"
+gen-config-analyse = "gen_config.histograms:main"
+gen-config-vis = "gen_config.visualiser:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]

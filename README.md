@@ -8,7 +8,15 @@
 
 ###### **NB: At present, this software can only be used on files provided in the form produced by RMCProfile, i.e. '.rmc6f' files. It is hoped that future versions will be adapted to accommodate all file types pertaining to the location and species of constituent atoms.** 
 
-###### **NBII: It is also worth noting that the batch script version requires adapting for Mac and Linux OS, though all .py files contained herein are usable across all operating systems. It is also hoped that this will be addressed in future versions.**  
+#### 0. Installation
+
+###### As of this version, Gen_Config is a proper installable Python package (see `pyproject.toml`), rather than loose scripts. Run the following once from the repository root (the launcher scripts below do this for you automatically):
+
+```
+pip install -e .
+```
+
+###### This installs `numpy`, `pandas`, `matplotlib`, and `tqdm` at compatible versions, and makes the `gen-config`, `gen-config-batch`, `gen-config-dict`, `gen-config-analyse`, and `gen-config-vis` commands available. The implementation lives in `src/gen_config/`; the files in `exe/` and `Batching_Scripts/` are now thin backward-compatible wrappers around it, kept so existing scripts/muscle memory pointing at those exact filenames keep working. The launcher scripts (`Configurational_Analysis.bat` / `.sh`) now work identically on Windows, macOS, and Linux.
 
 #### 1. Using the software
 
@@ -26,7 +34,7 @@
 3. vis:
 ###### Use this command to generate interactive images of the enhanced configurations of your large-box model. This is, at present, a manual process: the user will be prompted for the dictionaries directory once again, followed by a request for the desired configurations for visualisation. Configurations may be input using their associated Configurational label, in any order, as long as they are separated by commas in the form: 0,12,34,14,... The plotting window that opens will make use of matplotlib.pyplot, for a three dimensional, rotatable image.
 
-###### The other method for using this software is to use the Python scripts contained in the 'Batching Scripts' directory. These .py files are identical to the ones contained in the 'exe' folder, and can be run in sequence using the **Configuration_Master.py** file if desired. The utility of this folder is to allow high-throughput configurational analysis for many datasets, without the requirement for user input. These .py files (specifically Generalised_Clapp_vx.py and Histograms_vx.py) can be run through the terminal via a looped batch script. Note: The Requirements.bat and requirements.txt files are there to highlight the necessary Python modules for the use of this software, and the .bat file can be run on its own to automate the module download process. 
+###### The other method for using this software is to use the Python scripts contained in the 'Batching Scripts' directory (thin wrappers around the same `gen_config` package used by 'exe'), which can be run in sequence using the **Configuration_Master.py** file if desired - equivalently, the installed `gen-config-batch` command does the same thing. The utility of this folder is to allow high-throughput configurational analysis for many datasets, without the requirement for user input at every single step (dict/config Y/N prompts still apply). These scripts (specifically Generalised_Clapp_v2.py and Histograms_v2_2.py) can be run through the terminal via a looped batch script. Note: **Requirements.bat** now runs `pip install -e .` against the repository root, matching the main installation step above.
 
 
 #### 2. Files Produced by this Software
@@ -54,3 +62,12 @@ B. Configuration Histograms and Associated 'Clapp' Files
 - .clapp: The .clapp file contains a list of all of the atoms in the large-box: their coordinates, type, and associated Configuration in each pseudo-binary. The file also contains information on the size of the large-box.
 
 - _EF.clapp: The _EF.clapp file is the important one for analysis - this contains a list of Clapp-style Configurations, the number of atoms in the system that correspond to that configuration for each pseudobinary, and their statistical enhancement. Totals and statistical enhancements are provided for each pseudo-binary _and_ atoms A, B, and total in each case. The important column to note is the final 'total' column, which contains the overall enhancement of that configuration in the system.
+
+#### 3. Development
+
+###### `tests/` contains an end-to-end regression test (a synthetic solid-solution structure run through `dict` -> `config` -> `vis`) plus the fixtures it needs. Install the dev extra and run it with:
+
+```
+pip install -e ".[dev]"
+pytest
+```
