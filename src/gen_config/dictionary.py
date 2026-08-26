@@ -65,7 +65,9 @@ def Polar_dict(cartesian_frame, a, b, c, alpha, beta, gamma, col1='x', col2='y',
     cartesian_frame[col2] = Y
     cartesian_frame[col3] = Z
     
-    zero_tol = 1e-5  # was `1**(-5)`, which evaluates to 1.0 in Python (any power of 1 is 1) rather than the intended 1e-5 tolerance
+    # Reverted to the original literal `1**(-5)` (== 1.0) tolerance on request - this is the
+    # exact original calculation, not the 1e-5 fix proposed and then reverted earlier.
+    zero_tol = 1**(-5)
     for col in (col1, col2, col3):
         near_zero = cartesian_frame[col].abs() < zero_tol
         cartesian_frame.loc[near_zero, col] = 0.0
@@ -122,17 +124,13 @@ def N_N(dictionary, no, cen_atom_dict, super_dim, len_a, len_b, len_c):
                 min_val         - The distance of the nearest neighbours from the located atom (Type: Float)
                 Atom            - The index of the central atom (Type: Integer)
     """
-    df = dictionary[no]
-    interior = df.index[
-        (df['x'] != 0.0) & (df['x'] != super_dim[0]*len_a) &
-        (df['y'] != 0.0) & (df['y'] != super_dim[1]*len_b) &
-        (df['z'] != 0.0) & (df['z'] != super_dim[2]*len_c)
-    ]  # Atoms not lying on a supercell boundary face
+    # Reverted to the original atom-selection loop on request (exact original calculation).
+    Atom = round(0.5*len(dictionary[no])) #Find atom at roughly half way through dataframe
 
-    if len(interior) == 0:
-        raise ValueError(f"Sub-lattice {no}: every atom lies on a supercell boundary face - cannot find an interior atom to centre the nearest-neighbour search on.")
-
-    Atom = interior[round(0.5*len(interior))]  #Pick an atom at roughly the halfway point among interior atoms
+    while (dictionary[no]['x'].iloc[Atom] == 0.0) or (dictionary[no]['x'].iloc[Atom] == super_dim[0]*len_a) \
+        or (dictionary[no]['y'].iloc[Atom] == 0.0) or (dictionary[no]['y'].iloc[Atom] == super_dim[1]*len_b) \
+            or (dictionary[no]['z'].iloc[Atom] == 0.0) or (dictionary[no]['z'].iloc[Atom] == super_dim[2]*len_c):
+                Atom = Atom+1 #If atom along edge, add a few on to ensure it's an atom in the body
 
     cen_atom_dict[no] = pd.DataFrame(dictionary[no].iloc[Atom])
     

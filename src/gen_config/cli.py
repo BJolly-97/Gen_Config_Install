@@ -24,8 +24,8 @@ def _run_repl():
     while True:
         command = input(
             "> Enter command (i.e. dict (Configurational Dictionaries), "
-            "config (Configurational Analysis), vis (Configuration Visualiser) "
-            "or exit): "
+            "config (Configurational Analysis), vis (Configuration Visualiser), "
+            "gui (Desktop GUI) or exit): "
         ).strip().lower()
 
         if command == "dict":
@@ -34,6 +34,9 @@ def _run_repl():
             histograms.main()
         elif command == "vis":
             visualiser.main()
+        elif command == "gui":
+            from gen_config.gui.app import main as gui_main  # lazy: don't force a Tkinter/display dependency on plain CLI usage
+            gui_main()
         elif command == "exit":
             break
         else:
@@ -92,6 +95,8 @@ def build_parser():
     p_vis.add_argument("--sublattice", help="Sub-lattice number to visualise.")
     p_vis.add_argument("--config", help='Configuration label(s) to plot, comma-separated, e.g. "0,12,34".')
 
+    sub.add_parser("gui", help="Launch the desktop GUI (Dictionary/Analysis/Visualiser as one window).")
+
     return parser
 
 
@@ -128,6 +133,10 @@ def main(argv=None):
             visualiser.run(args.dict_dir, args.sublattice, args.config)
         else:
             visualiser.main(dict_dir=args.dict_dir)
+
+    elif args.command == "gui":
+        from gen_config.gui.app import main as gui_main  # lazy: don't force a Tkinter/display dependency on plain CLI usage
+        gui_main()
 
 
 if __name__ == "__main__":

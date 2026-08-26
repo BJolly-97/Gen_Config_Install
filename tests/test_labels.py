@@ -27,21 +27,34 @@ def workdir(tmp_path, monkeypatch):
 
 
 def test_plots_are_titled_and_labelled(workdir, monkeypatch):
-    """dict -> config against the two-species fixture; every plt.title()/plt.ylabel()/
-    plt.xlabel() call made along the way should mention a real species name, not just a
-    bare numeric partition index."""
+    """dict -> config against the two-species fixture; every Figure saved along the way
+    should have a title/axis labels naming a real species, not just a bare numeric
+    partition index. histograms.py builds each Figure directly (not via pyplot - see the
+    threading-safety comment in histograms.py's plotting section) and never returns them
+    (they're only ever fig.savefig()'d), so this intercepts Figure.savefig() to capture
+    each figure's real Axes state at the moment it would have been written to disk."""
     import matplotlib
     matplotlib.use("Agg")
-    import matplotlib.pyplot as plt
+    from matplotlib.figure import Figure
 
-    calls = {"title": [], "xlabel": [], "ylabel": [], "legend": 0}
-    monkeypatch.setattr(plt, "title", lambda t, *a, **k: calls["title"].append(t))
-    monkeypatch.setattr(plt, "xlabel", lambda t, *a, **k: calls["xlabel"].append(t))
-    monkeypatch.setattr(plt, "ylabel", lambda t, *a, **k: calls["ylabel"].append(t))
-    monkeypatch.setattr(plt, "legend", lambda *a, **k: calls.__setitem__("legend", calls["legend"] + 1))
+    saved_figures = []
+    original_savefig = Figure.savefig
+
+    def spy_savefig(self, *a, **k):
+        saved_figures.append(self)
+        return original_savefig(self, *a, **k)
+
+    monkeypatch.setattr(Figure, "savefig", spy_savefig)
 
     dictionary.run("FeNi.cif", equivalence=[[0, 1]])
     histograms.run(".", sublattice="0", rmc6f="run1.rmc6f")
+
+    calls = {
+        "title": [fig.axes[0].get_title() for fig in saved_figures],
+        "xlabel": [fig.axes[0].get_xlabel() for fig in saved_figures],
+        "ylabel": [fig.axes[0].get_ylabel() for fig in saved_figures],
+        "legend": sum(1 for fig in saved_figures if fig.axes[0].get_legend() is not None),
+    }
 
     # 4 plots per partition (Tot, A, B, AB) x 1 partition for a 2-species system. Which
     # species ends up "A" vs "B" isn't fixed by this test - only that the labelling is

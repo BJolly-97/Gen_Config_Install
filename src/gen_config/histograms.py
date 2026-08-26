@@ -488,7 +488,16 @@ def run(dict_dir, sublattice=None, rmc6f=None):
                  A.append(config_df[1].iloc[new_comp_no])
              else:
                  A.append(-config_df[1].iloc[new_comp_no])
-     	A1=[]	
+     	A1=[]
+     	# KNOWN BUG, NOT YET FIXED (see investigation notes) - `binom_df.loc[0,0]` here reads
+     	# back the *minimum* CC from the already-sorted .binomN file (not the always-positive
+     	# CC=1 sentinel this comparison meant in dictionary.py's original in-memory
+     	# DataFrame), so this branch almost never triggers as intended. A first attempt to fix
+     	# it (comparing against a fixed 1 instead) made real 12-NN data collapse onto a single
+     	# CC bin - worse than the original, not better - so the correct selection rule is not
+     	# simply "is A[m2] >= 1". Left as the original (buggy but previously-shipped) behaviour
+     	# pending a correct derivation, rather than shipping a second guess that's already been
+     	# shown wrong on real data.
      	for m2 in range(int(len(A)/2)):
              if A[m2]<=binom_df.loc[0,0]-1:
                  A1.append(A[len(A)-1-m2])
@@ -714,7 +723,16 @@ def run(dict_dir, sublattice=None, rmc6f=None):
     ######## SAVE PLOTS
     ##############################
 
-    import matplotlib.pyplot as plt
+    from matplotlib.figure import Figure  # NOT pyplot: this section only ever saves to PNG
+    # (plt.show() below is commented out and always has been), so there's no reason to touch
+    # pyplot's stateful, GUI-backend-aware global figure tracking at all. That matters beyond
+    # tidiness: pyplot's plt.figure()/plt.show() require the active GUI backend's main thread,
+    # so calling them from a background thread (e.g. the desktop GUI's Analysis tab, which
+    # runs run_batch() off the main thread so the window doesn't freeze) raises
+    # "Starting a Matplotlib GUI outside of the main thread will likely fail." Building each
+    # Figure directly and calling fig.savefig() sidesteps pyplot entirely, so it's safe to
+    # call from any thread, regardless of which backend (if any) the rest of the process has
+    # configured.
 
     def _pseudo_binary_label(n1):
         """
@@ -757,61 +775,60 @@ def run(dict_dir, sublattice=None, rmc6f=None):
              xDATBvalues.append(config_hist[n1][0])
              yDATBvalues.append(config_hist[n1][m1+1][19])
      	#print max(yDATvalues)
-     	plt.figure()  # explicit new 2D figure/axes - without this, plt.bar()/plt.axis() below implicitly reuse whatever figure (e.g. visualiser's 3D one) pyplot considers "current", which can crash or plot into the wrong axes if this runs after visualiser in the same process
-     	plt.bar(xDATvalues,yDATvalues,color='red')
-     	plt.axis([binom_df[0].iloc[0],binom_df[0].iloc[-1],min(yDATvalues)-0.5,max(yDATvalues)+0.5])
-     	plt.axhline(y=3, color='black', linestyle='dashed', linewidth=1)
-     	plt.axhline(y=-3, color='black', linestyle='dashed', linewidth=1)
-     	plt.title(partition_title)
-     	plt.xlabel("Configuration (CC)")
-     	plt.ylabel("Enhancement Factor (Ψ)")
-     	plt.savefig(filename_stem+"_"+str(m1+1)+"C_sub"+str(sub_num)+"_EF.png")
-     	#plt.show()
-     	plt.close()
+     	fig = Figure()
+     	ax = fig.add_subplot()
+     	ax.bar(xDATvalues,yDATvalues,color='red')
+     	ax.axis([binom_df[0].iloc[0],binom_df[0].iloc[-1],min(yDATvalues)-0.5,max(yDATvalues)+0.5])
+     	ax.axhline(y=3, color='black', linestyle='dashed', linewidth=1)
+     	ax.axhline(y=-3, color='black', linestyle='dashed', linewidth=1)
+     	ax.set_title(partition_title)
+     	ax.set_xlabel("Configuration (CC)")
+     	ax.set_ylabel("Enhancement Factor (Ψ)")
+     	fig.savefig(filename_stem+"_"+str(m1+1)+"C_sub"+str(sub_num)+"_EF.png")
      	#
-     	plt.figure()
-     	plt.bar(xDATAvalues,yDATAvalues,color='blue')
-     	plt.axis([binom_df[0].iloc[0],binom_df[0].iloc[-1],min(yDATAvalues)-0.5,max(yDATAvalues)+0.5])
-     	plt.axhline(y=3, color='black', linestyle='dashed', linewidth=1)
-     	plt.axhline(y=-3, color='black', linestyle='dashed', linewidth=1)
-     	plt.title(partition_title+"\ncentred on "+label_a)
-     	plt.xlabel("Configuration (CC)")
-     	plt.ylabel("Enhancement Factor (Ψ)")
-     	plt.savefig(filename_stem+"_"+str(m1+1)+"C_sub"+str(sub_num)+"_EF_A.png")
-     	plt.close()
+     	fig = Figure()
+     	ax = fig.add_subplot()
+     	ax.bar(xDATAvalues,yDATAvalues,color='blue')
+     	ax.axis([binom_df[0].iloc[0],binom_df[0].iloc[-1],min(yDATAvalues)-0.5,max(yDATAvalues)+0.5])
+     	ax.axhline(y=3, color='black', linestyle='dashed', linewidth=1)
+     	ax.axhline(y=-3, color='black', linestyle='dashed', linewidth=1)
+     	ax.set_title(partition_title+"\ncentred on "+label_a)
+     	ax.set_xlabel("Configuration (CC)")
+     	ax.set_ylabel("Enhancement Factor (Ψ)")
+     	fig.savefig(filename_stem+"_"+str(m1+1)+"C_sub"+str(sub_num)+"_EF_A.png")
      	#
-     	plt.figure()
-     	plt.bar(xDATBvalues,yDATBvalues,color='green')
-     	plt.axis([binom_df[0].iloc[0],binom_df[0].iloc[-1],min(yDATBvalues)-0.5,max(yDATBvalues)+0.5])
-     	plt.axhline(y=3, color='black', linestyle='dashed', linewidth=1)
-     	plt.axhline(y=-3, color='black', linestyle='dashed', linewidth=1)
-     	plt.title(partition_title+"\ncentred on "+label_b)
-     	plt.xlabel("Configuration (CC)")
-     	plt.ylabel("Enhancement Factor (Ψ)")
-     	plt.savefig(filename_stem+"_"+str(m1+1)+"C_sub"+str(sub_num)+"_EF_B.png")
-     	plt.close()
+     	fig = Figure()
+     	ax = fig.add_subplot()
+     	ax.bar(xDATBvalues,yDATBvalues,color='green')
+     	ax.axis([binom_df[0].iloc[0],binom_df[0].iloc[-1],min(yDATBvalues)-0.5,max(yDATBvalues)+0.5])
+     	ax.axhline(y=3, color='black', linestyle='dashed', linewidth=1)
+     	ax.axhline(y=-3, color='black', linestyle='dashed', linewidth=1)
+     	ax.set_title(partition_title+"\ncentred on "+label_b)
+     	ax.set_xlabel("Configuration (CC)")
+     	ax.set_ylabel("Enhancement Factor (Ψ)")
+     	fig.savefig(filename_stem+"_"+str(m1+1)+"C_sub"+str(sub_num)+"_EF_B.png")
      	#
-     	plt.figure()
-     	plt.bar(xDATAvalues,yDATAvalues,color='blue',label=label_a)
-     	plt.bar(xDATBvalues,yDATBvalues,color='green',label=label_b)
+     	fig = Figure()
+     	ax = fig.add_subplot()
+     	ax.bar(xDATAvalues,yDATAvalues,color='blue',label=label_a)
+     	ax.bar(xDATBvalues,yDATBvalues,color='green',label=label_b)
      	if max(yDATAvalues)>=max(yDATBvalues):
              if min(yDATAvalues)<=min(yDATBvalues):
-                 plt.axis([binom_df[0].iloc[0],binom_df[0].iloc[-1],min(yDATAvalues)-0.5,max(yDATAvalues)+0.5])
+                 ax.axis([binom_df[0].iloc[0],binom_df[0].iloc[-1],min(yDATAvalues)-0.5,max(yDATAvalues)+0.5])
              else:
-                 plt.axis([binom_df[0].iloc[0],binom_df[0].iloc[-1],min(yDATBvalues)-0.5,max(yDATAvalues)+0.5])
+                 ax.axis([binom_df[0].iloc[0],binom_df[0].iloc[-1],min(yDATBvalues)-0.5,max(yDATAvalues)+0.5])
      	else:
              if min(yDATAvalues)<=min(yDATBvalues):
-                 plt.axis([binom_df[0].iloc[0],binom_df[0].iloc[-1],min(yDATAvalues)-0.5,max(yDATBvalues)+0.5])
+                 ax.axis([binom_df[0].iloc[0],binom_df[0].iloc[-1],min(yDATAvalues)-0.5,max(yDATBvalues)+0.5])
              else:
-                 plt.axis([binom_df[0].iloc[0],binom_df[0].iloc[-1],min(yDATBvalues)-0.5,max(yDATBvalues)+0.5])
-     	plt.axhline(y=3, color='black', linestyle='dashed', linewidth=1)
-     	plt.axhline(y=-3, color='black', linestyle='dashed', linewidth=1)
-     	plt.title(partition_title)
-     	plt.xlabel("Configuration (CC)")
-     	plt.ylabel("Enhancement Factor (Ψ)")
-     	plt.legend()
-     	plt.savefig(filename_stem+"_"+str(m1+1)+"C_sub"+str(sub_num)+"_EF_AB.png")
-     	plt.close()
+                 ax.axis([binom_df[0].iloc[0],binom_df[0].iloc[-1],min(yDATBvalues)-0.5,max(yDATBvalues)+0.5])
+     	ax.axhline(y=3, color='black', linestyle='dashed', linewidth=1)
+     	ax.axhline(y=-3, color='black', linestyle='dashed', linewidth=1)
+     	ax.set_title(partition_title)
+     	ax.set_xlabel("Configuration (CC)")
+     	ax.set_ylabel("Enhancement Factor (Ψ)")
+     	ax.legend()
+     	fig.savefig(filename_stem+"_"+str(m1+1)+"C_sub"+str(sub_num)+"_EF_AB.png")
 
     print("\nConfigurational Analysis Complete.\n")
 
@@ -820,7 +837,7 @@ def run(dict_dir, sublattice=None, rmc6f=None):
     return filename_stem
 
 
-def run_batch(dict_dir, sublattice, rmc6f_paths):
+def run_batch(dict_dir, sublattice, rmc6f_paths, on_progress=None):
     """
     Runs run() for every path in `rmc6f_paths` against the same dictionary/sub-lattice,
     one dataset at a time, in-process (no per-file prompting, no subprocess spawning).
@@ -833,20 +850,29 @@ def run_batch(dict_dir, sublattice, rmc6f_paths):
     Args:   dict_dir     - Directory containing the .finsub/.basisN/.binomN/.cfgdictN files. (Type: str)
             sublattice   - Which sub-lattice number to analyse.                 (Type: int | str)
             rmc6f_paths  - The .rmc6f files to process.                          (Type: list[str])
+            on_progress  - Optional callback(index, total, path, status), called after each
+                          file completes (status is "ok" or "failed") - e.g. for a GUI
+                          progress bar. Called from whatever thread run_batch() runs in.
+                                                                       (Type: callable | None)
     Returns:    (succeeded, failed) - succeeded is a list of output_stem strings (run()'s
                 return value) in the order they completed; failed is a list of
                 (path, exception) pairs for anything that raised.
     """
     succeeded = []
     failed = []
+    total = len(rmc6f_paths)
 
-    for path in tqdm(rmc6f_paths, desc="Batch: analysing .rmc6f configurations"):
+    for i, path in enumerate(tqdm(rmc6f_paths, desc="Batch: analysing .rmc6f configurations")):
         try:
             stem = run(dict_dir, sublattice=sublattice, rmc6f=path)
             succeeded.append(stem)
+            status = "ok"
         except Exception as exc:
             print(f"\n[FAILED] {path}: {type(exc).__name__}: {exc}")
             failed.append((path, exc))
+            status = "failed"
+        if on_progress is not None:
+            on_progress(i + 1, total, path, status)
 
     print(f"\nBatch complete: {len(succeeded)} succeeded, {len(failed)} failed.")
     if failed:

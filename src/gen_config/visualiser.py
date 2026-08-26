@@ -8,19 +8,12 @@ Created on Mon Jun 24 13:18:40 2024
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+from matplotlib.figure import Figure
 import os
 
 
-def run(dict_dir, sublattice, config):
-    """
-    Plots the given Clapp Configuration(s) for one sub-lattice as interactive 3D scatter
-    plots (occupied neighbour = red, empty = black).
-
-    Args:   dict_dir    - Directory containing the .basisN/.cfgdictN files.        (Type: str)
-            sublattice  - Which sub-lattice number to visualise (as printed in .finsub). (Type: int | str)
-            config      - Configuration label(s) to plot. Either a comma-separated string
-                          ("0,12,34") or a list of labels.              (Type: str | list[str])
-    """
+def _load_basis_and_config(dict_dir, sublattice):
+    """Reads the .basisN/.cfgdictN files for one sub-lattice. Returns (basis_df, config_df)."""
     filepath = dict_dir.strip('"')
     sub_num = str(sublattice)
 
@@ -38,60 +31,109 @@ def run(dict_dir, sublattice, config):
         raise FileNotFoundError(f"No '.basis{sub_num}'/'.cfgdict{sub_num}' files found in '{filepath}' for sub-lattice {sub_num}.")
 
     basis = open(os.path.join(filepath, basis_ext), "r")
-
     line_read = basis.readlines()
-
     basis.close()
 
     lines = line_read.copy()
-
     del lines[0:2]
     del lines[-1]
 
     basis_df = pd.DataFrame(lines)
-
     basis_df = basis_df[0].str.split('\\s+', expand = True)
     basis_df.drop([0, 4, 5], axis=1, inplace=True)
     basis_df.rename(columns={1:'x', 2:'y', 3:'z',5:'Atom No.'}, inplace=True)
 
-
-    #%%
-
     config_dict = open(os.path.join(filepath, clapp_ext), "r")
     config_read = config_dict.readlines()
-
     config_dict.close()
 
     config_df = pd.DataFrame(config_read)
-
     config_df = config_df[0].str.split('\\s+', expand = True)
+
+    return basis_df, config_df
+
+
+def _plotting_df_for_label(basis_df, config_df, label):
+    """Looks up `label` (a Configuration label, e.g. '12') in config_df and returns the
+    basis positions joined with their occupied(1)/empty(0) state as a DataFrame, or None
+    if the label doesn't exist for this sub-lattice."""
+    input_dec = None
+    for n in range(len(config_df)):
+        if config_df[1][n] == label:
+            input_dec = int(config_df[0][n])
+            break
+
+    if input_dec is None:
+        return None
+
+    input_bin = bin(input_dec)
+    full_bin = input_bin[2:].zfill(len(basis_df))
+    full_bin = list(full_bin)
+    bin_df = pd.DataFrame(full_bin)
+    bin_df.rename(columns={0:'Bin'}, inplace=True)
+
+    return pd.concat([basis_df, bin_df], axis=1)
+
+
+def _draw_configuration(ax, plotting_df, label):
+    """Draws the occupied(red)/empty(black) nearest-neighbour scatter for one configuration
+    onto an existing 3D Axes."""
+    for i in range(len(plotting_df)):
+        if plotting_df['Bin'][i] == '1':
+            ax.scatter(float(plotting_df['x'].iloc[i]), float(plotting_df['y'].iloc[i]), float(plotting_df['z'].iloc[i]), color='r', s=500)
+        elif plotting_df['Bin'][i] == '0':
+            ax.scatter(float(plotting_df['x'].iloc[i]), float(plotting_df['y'].iloc[i]), float(plotting_df['z'].iloc[i]), color='black', s=500)
+
+    ax.scatter(0,0,0, marker='X', color='black', s=150)
+    ax.set_xlabel('X')
+    ax.set_ylabel('Y')
+    ax.set_zlabel('Z')
+    ax.set_title("C"+label)
+
+
+def build_figure(dict_dir, sublattice, label):
+    """
+    Builds a standalone matplotlib Figure for one Configuration label, without touching
+    pyplot's global "current figure" state - safe to embed in a GUI (e.g. via
+    FigureCanvasTkAgg(fig, master=...)) rather than only usable as a plt.show() popup.
+
+    Args:   dict_dir    - Directory containing the .basisN/.cfgdictN files.        (Type: str)
+            sublattice  - Which sub-lattice number to visualise.          (Type: int | str)
+            label       - A single Configuration label (e.g. "12").              (Type: str)
+    Returns:    A matplotlib.figure.Figure, or None if `label` doesn't exist for this
+                sub-lattice.
+    """
+    basis_df, config_df = _load_basis_and_config(dict_dir, sublattice)
+    plotting_df = _plotting_df_for_label(basis_df, config_df, label)
+    if plotting_df is None:
+        return None
+
+    fig = Figure()
+    ax = fig.add_subplot(projection='3d')
+    _draw_configuration(ax, plotting_df, label)
+    return fig
+
+
+def run(dict_dir, sublattice, config):
+    """
+    Plots the given Clapp Configuration(s) for one sub-lattice as interactive 3D scatter
+    plots (occupied neighbour = red, empty = black), one pop-up window per label.
+
+    Args:   dict_dir    - Directory containing the .basisN/.cfgdictN files.        (Type: str)
+            sublattice  - Which sub-lattice number to visualise (as printed in .finsub). (Type: int | str)
+            config      - Configuration label(s) to plot. Either a comma-separated string
+                          ("0,12,34") or a list of labels.              (Type: str | list[str])
+    """
+    basis_df, config_df = _load_basis_and_config(dict_dir, sublattice)
 
     input_config = config.split(',') if isinstance(config, str) else list(config)
 
-    for z in range(len(input_config)):
-        input_dec = None
-        for n in range(len(config_df)):
-            if config_df[1][n] == input_config[z]:
-                input_dec = int(config_df[0][n])
-                break
+    for label in input_config:
+        plotting_df = _plotting_df_for_label(basis_df, config_df, label)
 
-        if input_dec is None:
-            print(f"\nConfiguration label '{input_config[z]}' not found for this sub-lattice - skipping.")
+        if plotting_df is None:
+            print(f"\nConfiguration label '{label}' not found for this sub-lattice - skipping.")
             continue
-
-        #%%
-
-        #input_dec = int(input("Decimal Number of Configuration from Dictionary:"))
-
-        input_bin = bin(input_dec)
-
-        full_bin = input_bin[2:].zfill(len(basis_df))
-
-        full_bin = list(full_bin)
-        bin_df = pd.DataFrame(full_bin)
-        bin_df.rename(columns={0:'Bin'}, inplace=True)
-
-        Plotting_df = pd.concat([basis_df, bin_df], axis=1)
 
         axes = [1,1,1]
         data = np.ones(axes)
@@ -99,19 +141,7 @@ def run(dict_dir, sublattice, config):
 
         fig = plt.figure()
         ax = fig.add_subplot(projection='3d')
-
-        for i in range(len(Plotting_df)):
-            if Plotting_df['Bin'][i] == '1':
-                ax.scatter(float(Plotting_df['x'].iloc[i]), float(Plotting_df['y'].iloc[i]), float(Plotting_df['z'].iloc[i]), color='r', s=500)
-            elif Plotting_df['Bin'][i] == '0':
-                ax.scatter(float(Plotting_df['x'].iloc[i]), float(Plotting_df['y'].iloc[i]), float(Plotting_df['z'].iloc[i]), color='black', s=500)
-
-
-        ax.scatter(0,0,0, marker='X', color='black', s=150)
-        ax.set_xlabel('X')
-        ax.set_ylabel('Y')
-        ax.set_zlabel('Z')
-        ax.set_title("C"+input_config[z])
+        _draw_configuration(ax, plotting_df, label)
 
         plt.show()
 
