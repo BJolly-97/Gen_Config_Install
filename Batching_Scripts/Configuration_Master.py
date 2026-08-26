@@ -5,7 +5,6 @@ Created on Thu Oct 24 13:45:19 2024
 @author: Ben Jolly
 """
 
-import sys
 import os
 
 # Resolve paths relative to this script's own location, not the current working directory -
