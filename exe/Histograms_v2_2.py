@@ -369,10 +369,15 @@ master_df[0] = master_df[0].map(mapping)
 for i in [1,2,3]:
     master_df[i+7]=0
     master_df[i+7]+=(master_df[i]*U[i-1])-master_df[i+4]
-for i in range(len(master_df)):
-    for j in [1,2,3]:
-        if master_df[j+7].iloc[i] > 1:
-            master_df.loc[i, j+7] = 0
+
+# Wrap into the principal range around the atom's assigned home unit cell. An atom whose
+# RMC-fitted (displaced) position crosses a periodic boundary relative to its recorded
+# reference cell can come out of the subtraction above near +-1 instead of near 0; wrapping
+# to the nearest integer preserves the true small displacement instead of discarding it
+# (previously: `if disp > 1: disp = 0`, a one-sided clamp that zeroed the value outright and
+# never handled the equivalent undershoot below 0).
+for i in [1,2,3]:
+    master_df[i+7] = master_df[i+7] - master_df[i+7].round()
 
 
 #%%Averaging the offsite displacements to find ideal lattice positions

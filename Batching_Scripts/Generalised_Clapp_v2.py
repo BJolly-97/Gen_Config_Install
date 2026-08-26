@@ -831,7 +831,12 @@ for number in range(len(NN_v)):
                 result = eval(sym_ops_NN[k][j])
                 Origin_sym_dump[k] = result
             else:
-                break
+                # A valid general-position symmetry operator can't have a component with no
+                # x/y/z at all (the rotation part must be invertible, so no coordinate's linear
+                # part can vanish) - reaching here means this CIF's symmetry operators are
+                # malformed or non-standard. Fail loudly rather than silently mis-assigning
+                # the remaining axes.
+                raise ValueError(f"Unrecognised symmetry operator component '{sym_ops_NN[k][j]}' (axis '{k}', operation {j}) - expected an expression containing x, y, or z.")
             
         # Checks whether the symmetry-transformed position matches the original atom position
         # up to a +1 lattice translation independently on each axis (periodic boundary: an atom
@@ -871,7 +876,10 @@ for number in range(len(NN_v)):
                 result = eval(symmetry_collect[k][j])
                 NN_sym_dump[k] = result
             else:
-                break
+                # See the equivalent branch above - this shouldn't be reachable for a valid
+                # general-position symmetry operator. Fail loudly rather than silently
+                # mis-assigning the remaining axes.
+                raise ValueError(f"Unrecognised symmetry operator component '{symmetry_collect[k][j]}' (axis '{k}', operation {j}) - expected an expression containing x, y, or z.")
 
 
         for k in range(len(NN_sym_dump)):
