@@ -740,6 +740,24 @@ def run(dict_dir, sublattice=None, rmc6f=None):
     # call from any thread, regardless of which backend (if any) the rest of the process has
     # configured.
 
+    def _group_label(groups):
+        """
+        Turns a list of species-name groups (each group one or more element symbols) into
+        one label string. Two groups where exactly one is a lone species: that species
+        followed by ":Ψ" (Psi stands for "everything else on the other side" - unambiguous
+        since there's only one other side, e.g. "Cr:Ψ" for Cr vs Ni-Co). Anything else -
+        two multi-species groups (e.g. "Cr-Fe:Co-Ni"), or three or more groups of any size
+        (e.g. "Cr:Fe:Co-Ni") - every group is always spelled out in full: hyphen-joined
+        within a group, colon-joined between groups. Ψ is reserved strictly for the
+        two-groups-one-lone-species case; it's never used anywhere else, since with more
+        than two groups (or two multi-species groups) it would be ambiguous which side/group
+        it refers to.
+        """
+        if len(groups) == 2 and min(len(groups[0]), len(groups[1])) == 1:
+            lone = groups[0][0] if len(groups[0]) == 1 else groups[1][0]
+            return f"{lone}:Ψ"
+        return ':'.join('-'.join(group) for group in groups)
+
     def _pseudo_binary_label(n1):
         """
         Names the two sides of pseudo-binary partition n1 (1-indexed) in terms of the real
@@ -747,19 +765,14 @@ def run(dict_dir, sublattice=None, rmc6f=None):
         grouping the enhancement-factor counting above already uses - so the label is
         guaranteed to describe what the numbers actually mean, not a separate guess at it.
 
-        Returns (title, group_a_names, group_b_names). `title` is just the single species
-        name when one side of the partition is a lone element (e.g. "Cr" for Cr vs Ni-Co,
-        since the complement is unambiguous); otherwise both sides are spelled out
-        (e.g. "Ni-Cr : Co-Fe").
+        Returns (title, group_a_names, group_b_names) - see _group_label() for how `title`
+        is built from the two groups.
         """
         red = modulo_sep(n1, 2, no_types_new)
         group_a = [at_labels[inv_mapping[i]] for i in range(no_types_new) if red[i] == 0]
         group_b = [at_labels[inv_mapping[i]] for i in range(no_types_new) if red[i] == 1]
 
-        if min(len(group_a), len(group_b)) == 1:
-            title = group_a[0] if len(group_a) == 1 else group_b[0]
-        else:
-            title = '-'.join(group_a) + ' : ' + '-'.join(group_b)
+        title = _group_label([group_a, group_b])
 
         return title, group_a, group_b
 
