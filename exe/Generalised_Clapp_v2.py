@@ -370,7 +370,8 @@ for val in range(len(coord_df)):
     
     sym_ops_df_loop = sym_ops_df.copy(deep=True) #Created duplicate dataframe
     sym_ops_df_loop[['x', 'y', 'z']] = sym_ops_df_loop['Symmetry Operations'].str.split(",", expand= True) #Separates symmetry operators by comma
-    
+    sym_ops_df_loop[['x', 'y', 'z']] = sym_ops_df_loop[['x', 'y', 'z']].astype(object)  # .str.split gives strict string-dtype columns on pandas 3.x, but the loop below assigns Fraction objects into them below
+
     char_to_replace = {'x':str(chem_index[0]), '-x':str(-chem_index[0]), 'y':str(chem_index[1]), '-y':str(-chem_index[1]), 'z':str(chem_index[2]), '-z':str(-chem_index[2])}#, '1/2':str(0.5)}
     columns_A = ['x','y','z']
     #Creates dictionary of symmetry operators and their equivalent atomic positions as given by .cif file

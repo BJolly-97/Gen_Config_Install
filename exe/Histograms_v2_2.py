@@ -81,15 +81,16 @@ if basis_ext is None or binom_ext is None or clapp_ext is None:
 #%%
 
 sublab = sublab[0].str.split('\t',expand=True)
+sublab[1] = sublab[1].astype(object)  # column 1 ends up holding a list per row below - .loc[i, col] = <list> doesn't reliably store a list as one cell (pandas tries to broadcast it instead), so this uses .at[] further down as well
 for i in range(len(sublab)):
     sublab.loc[i,1] = sublab.loc[i,1].replace('\n', '')
 
-for i in range(len(sublab)):    
+for i in range(len(sublab)):
     parts = sublab.loc[i,1].split('/')
 
 # Extract only the letters from each part
     sub_atoms = [re.findall(r'[A-Za-z]+', part)[0] for part in parts]
-    sublab.loc[i,1] = sub_atoms
+    sublab.at[i,1] = sub_atoms
 
 #%%
 
