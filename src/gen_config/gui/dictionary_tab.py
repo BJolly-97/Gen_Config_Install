@@ -50,6 +50,7 @@ class DictionaryTab(ttk.Frame):
         action_row.pack(fill="x", pady=4)
         self.generate_button = ttk.Button(action_row, text="Generate Dictionary", command=self._generate)
         self.generate_button.pack(side="left")
+        ttk.Button(action_row, text="Clear fields", command=self._clear_all).pack(side="left", padx=6)
         self.status_var = tk.StringVar(value="")
         ttk.Label(action_row, textvariable=self.status_var).pack(side="left", padx=10)
 
@@ -84,6 +85,17 @@ class DictionaryTab(ttk.Frame):
     def _remove_group(self):
         for i in reversed(self.group_listbox.curselection()):
             self.group_listbox.delete(i)
+
+    def _clear_all(self):
+        """Resets every input field on this tab back to a blank/just-launched state, so a
+        new single-instance run doesn't need leftover values from the last one cleared by hand."""
+        self.cif_var.set("")
+        self.group_entry_var.set("")
+        self.group_listbox.delete(0, "end")
+        self.status_var.set("")
+        self.log_text.configure(state="normal")
+        self.log_text.delete("1.0", "end")
+        self.log_text.configure(state="disabled")
 
     def _log(self, text):
         self.log_text.configure(state="normal")

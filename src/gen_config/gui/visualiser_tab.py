@@ -45,6 +45,7 @@ class VisualiserTab(ttk.Frame):
         btn_col.pack(fill="x", padx=4, pady=(0, 4))
         ttk.Button(btn_col, text="Plot selected", command=self._plot_selected).pack(fill="x")
         ttk.Button(btn_col, text="Close all tabs", command=self._close_all).pack(fill="x", pady=(4, 0))
+        ttk.Button(btn_col, text="Clear fields", command=self._clear_fields).pack(fill="x", pady=(4, 0))
 
         right = ttk.Frame(body)
         right.pack(side="left", fill="both", expand=True)
@@ -129,3 +130,13 @@ class VisualiserTab(ttk.Frame):
     def _close_all(self):
         for tab_id in self.plot_notebook.tabs():
             self.plot_notebook.forget(tab_id)
+
+    def _clear_fields(self):
+        """Resets the dictionary directory, sub-lattice, and configuration list back to a
+        blank/just-launched state, so picking a different dictionary doesn't leave stale
+        values lying around. Leaves any already-plotted tabs open - use "Close all tabs"
+        for those."""
+        self.dict_dir_var.set("")
+        self.sublattice_combo.configure(values=[])
+        self.sublattice_var.set("")
+        self.labels_listbox.delete(0, "end")

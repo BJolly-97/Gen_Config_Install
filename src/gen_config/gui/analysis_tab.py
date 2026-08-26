@@ -54,6 +54,7 @@ class AnalysisTab(ttk.Frame):
         action_row.pack(fill="x", pady=4)
         self.run_button = ttk.Button(action_row, text="Run Analysis", command=self._run)
         self.run_button.pack(side="left")
+        ttk.Button(action_row, text="Clear all fields", command=self._clear_all).pack(side="left", padx=6)
         self.progress = ttk.Progressbar(action_row, length=250, mode="determinate")
         self.progress.pack(side="left", padx=10)
         self.status_var = tk.StringVar(value="")
@@ -120,6 +121,22 @@ class AnalysisTab(ttk.Frame):
 
     def _clear_files(self):
         self.files_listbox.delete(0, "end")
+
+    def _clear_all(self):
+        """Resets every input field on this tab (dictionary directory, sub-lattice, glob
+        pattern, file list, progress/status/log), not just the file list that "Clear list"
+        already handled - so a new single-instance run doesn't need leftover values cleared
+        by hand."""
+        self.dict_dir_var.set("")
+        self.sublattice_combo.configure(values=[])
+        self.sublattice_var.set("")
+        self.glob_var.set("")
+        self.files_listbox.delete(0, "end")
+        self.progress.configure(value=0, maximum=1)
+        self.status_var.set("")
+        self.log_text.configure(state="normal")
+        self.log_text.delete("1.0", "end")
+        self.log_text.configure(state="disabled")
 
     def _log(self, text):
         self.log_text.configure(state="normal")
