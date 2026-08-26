@@ -753,7 +753,8 @@ for i in range(len(NN_v)):
 for i in range(len(NN_v)):
     basis_file = open(filename_stem+".basis"+str(i), 'w')
     basis_file.write(str(atom_name.loc[i,0])+ "\n") #atom_name[0].iloc[number]
-    basis_file.write(str(NN_v[i])+ "\n")
+    with pd.option_context('display.max_rows', None):  # otherwise str() truncates NN shells >60 atoms (pandas default display.max_rows), corrupting the file
+        basis_file.write(str(NN_v[i])+ "\n")
     basis_file.write("\n")
     basis_file.close() #Writes a basis set file for reconstructing the configurations from binary
 
