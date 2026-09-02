@@ -802,7 +802,7 @@ def run(dict_dir, sublattice=None, rmc6f=None):
      	ax.axhline(y=-3, color='black', linestyle='dashed', linewidth=1)
      	ax.set_title(partition_title)
      	ax.set_xlabel("Configuration (CC)")
-     	ax.set_ylabel("Enhancement Factor (Ψ)")
+     	ax.set_ylabel("Enhancement Factor (β)")
      	fig.savefig(filename_stem+"_"+str(m1+1)+"C_sub"+str(sub_num)+"_EF.png")
      	#
      	fig = Figure()
@@ -813,7 +813,7 @@ def run(dict_dir, sublattice=None, rmc6f=None):
      	ax.axhline(y=-3, color='black', linestyle='dashed', linewidth=1)
      	ax.set_title(partition_title+"\ncentred on "+label_a)
      	ax.set_xlabel("Configuration (CC)")
-     	ax.set_ylabel("Enhancement Factor (Ψ)")
+     	ax.set_ylabel("Enhancement Factor (β)")
      	fig.savefig(filename_stem+"_"+str(m1+1)+"C_sub"+str(sub_num)+"_EF_A.png")
      	#
      	fig = Figure()
@@ -824,7 +824,7 @@ def run(dict_dir, sublattice=None, rmc6f=None):
      	ax.axhline(y=-3, color='black', linestyle='dashed', linewidth=1)
      	ax.set_title(partition_title+"\ncentred on "+label_b)
      	ax.set_xlabel("Configuration (CC)")
-     	ax.set_ylabel("Enhancement Factor (Ψ)")
+     	ax.set_ylabel("Enhancement Factor (β)")
      	fig.savefig(filename_stem+"_"+str(m1+1)+"C_sub"+str(sub_num)+"_EF_B.png")
      	#
      	fig = Figure()
@@ -845,7 +845,7 @@ def run(dict_dir, sublattice=None, rmc6f=None):
      	ax.axhline(y=-3, color='black', linestyle='dashed', linewidth=1)
      	ax.set_title(partition_title)
      	ax.set_xlabel("Configuration (CC)")
-     	ax.set_ylabel("Enhancement Factor (Ψ)")
+     	ax.set_ylabel("Enhancement Factor (β)")
      	ax.legend()
      	fig.savefig(filename_stem+"_"+str(m1+1)+"C_sub"+str(sub_num)+"_EF_AB.png")
 
