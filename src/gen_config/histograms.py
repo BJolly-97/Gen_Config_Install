@@ -302,11 +302,23 @@ def run(dict_dir, sublattice=None, rmc6f=None):
          print("Cell dimensions = "+str(CD))
          print("Lattice parameters = "+str(LP_a)+" "+str(LP_b)+" "+str(LP_c))
      	######
+     	# RMC6f atom lines come in two shapes. The tail is always "ref celli cellj cellk"
+     	# and the coords are always 3 fields, but an optional site label may sit between
+     	# the element symbol and x - bracketed ("[1]") or bare ("1"):
+     	#     "1 Fe [1] 0.13 0.03 0.16 2 0 0 0"   (10 fields)
+     	#     "1 Fe  1  0.13 0.03 0.16 2 0 0 0"   (10 fields)
+     	#     "1 Fe     0.13 0.03 0.16 2 0 0 0"   (9 fields)
+     	# so work out where the coordinates start and use that everywhere below.
+         first_atom = raw_file[start_no]
+         coord_start = 3 if len(first_atom) >= 10 else 2
+     	######
      	# Reads the data in the file
          for n in range(start_no,len(raw_file),1):
-             raw.append([float(raw_file[n][3]), float(raw_file[n][4]), float(raw_file[n][5])])
-             #coordinates.append([round((float(raw_file[n][3]) - 0.5) * 2 * U[0],0), round((float(raw_file[n][4]) - 0.5) * 2 * U[1],0), round((float(raw_file[n][5]) - 0.5) * 2 * U[2],0)])
-             coordinates.append([float(raw_file[n][3]), float(raw_file[n][4]), float(raw_file[n][5])])
+             if len(raw_file[n]) < coord_start + 7:
+                 continue  # blank or truncated trailing line
+             raw.append([float(raw_file[n][coord_start]), float(raw_file[n][coord_start+1]), float(raw_file[n][coord_start+2])])
+             #coordinates.append([round((float(raw_file[n][coord_start]) - 0.5) * 2 * U[0],0), round((float(raw_file[n][coord_start+1]) - 0.5) * 2 * U[1],0), round((float(raw_file[n][coord_start+2]) - 0.5) * 2 * U[2],0)])
+             coordinates.append([float(raw_file[n][coord_start]), float(raw_file[n][coord_start+1]), float(raw_file[n][coord_start+2])])
              atoms.append(at_labels.index(raw_file[n][1]))
     else:
      	print("Don't recognise filetype, so have to stop...")
@@ -329,8 +341,13 @@ def run(dict_dir, sublattice=None, rmc6f=None):
             a_c_i = i
         
 
-    master_df_main =pd.DataFrame(raw_file[a_c_i+1:])
-    master_df_main.drop([0,2], axis=1, inplace=True)
+    atom_lines = [row for row in raw_file[a_c_i+1:] if len(row) >= coord_start + 7]
+    master_df_main = pd.DataFrame(atom_lines)
+    # Keep element symbol (col 1), x/y/z, ref number and cell i/j/k; drop the atom id
+    # (col 0) and - when the file has one - the bracketed site label (col 2). coord_start
+    # (2 or 3) was worked out from the first atom line above.
+    keep_cols = [1] + list(range(coord_start, coord_start + 7))
+    master_df_main = master_df_main[keep_cols]
     master_df_main.columns=range(master_df_main.shape[1])
 
     label_to_index = {label: j for j, label in enumerate(at_labels)}
