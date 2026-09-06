@@ -86,3 +86,15 @@ ignore = [
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+
+[tool.coverage.run]
+source = ["gen_config"]
+
+[tool.coverage.report]
+exclude_also = [
+    "if __name__ == .__main__.:",
+    "raise SystemExit",
+]
+# The Tkinter GUI (gen_config.gui.*) has no automated tests yet - it drags the
+# headline number down but the numerical core sits well above this floor.
+fail_under = 60
