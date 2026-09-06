@@ -26,6 +26,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Release automation: `.github/workflows/release.yml` builds and publishes to PyPI via
   Trusted Publishing (OIDC, no tokens) and cuts a GitHub Release on a `v*` tag. See
   `RELEASING.md`.
+- `Dockerfile` — a headless multi-stage image for the `dict` / `config` workflow,
+  built and smoke-tested in CI and pushed to GHCR on release.
 
 ### Changed
 - Renamed the distribution to `clapp-jolly` (the import package stays `gen_config`

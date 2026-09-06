@@ -26,6 +26,20 @@ cd Gen_Config-private
 pip install -e ".[dev]"
 ```
 
+## Docker
+
+A headless image (published to GHCR on each release) runs the `dict` and `config`
+commands with no Python install on the host — useful for reproducible batch runs on a
+cluster or in CI. Mount your working directory at `/data`:
+
+```bash
+docker run --rm -v "$PWD:/data" ghcr.io/bjolly-97/clapp-jolly \
+    config --dict-dir . --sublattice 0 --rmc6f run.rmc6f
+```
+
+The interactive `vis` viewer and the desktop GUI need a display and are not usable from
+the container.
+
 ## What you get
 
 A single command, **`gen-config`**. The importable package is `gen_config`:

@@ -38,6 +38,12 @@ From a clone, for development:
 pip install -e ".[dev]"
 ```
 
+Or run the headless CLI with no Python install via Docker:
+
+```bash
+docker run --rm -v "$PWD:/data" ghcr.io/bjolly-97/clapp-jolly config --dict-dir . --sublattice 0 --rmc6f run.rmc6f
+```
+
 Either way you get one command, **`gen-config`**. (The importable package is
 `gen_config`; the pre-package script names live in [`legacy/`](legacy/).)
 

@@ -1,0 +1,8 @@
+# Allowlist: the build context is only what's needed to build the wheel.
+# (.git is kept - setuptools-scm derives the version from it.)
+*
+!src
+!pyproject.toml
+!README.md
+!LICENSE
+!.git
