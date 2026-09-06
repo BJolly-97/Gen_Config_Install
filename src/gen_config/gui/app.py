@@ -10,6 +10,7 @@ def _apply_platform_fixes():
         # displays (the #1 "why does this look wrong on Windows" Tkinter complaint).
         try:
             import ctypes
+
             ctypes.windll.shcore.SetProcessDpiAwareness(1)
         except Exception:
             pass  # older Windows without shcore.dll - not fatal, just unscaled
@@ -19,6 +20,7 @@ def _import_tkinter():
     try:
         import tkinter as tk
         from tkinter import ttk
+
         return tk, ttk
     except ImportError as exc:
         lines = ["Tkinter is required for the GUI but isn't installed."]
@@ -46,6 +48,7 @@ def main():
     tk, ttk = _import_tkinter()
 
     import matplotlib
+
     matplotlib.use("TkAgg")
 
     from gen_config.gui.dictionary_tab import DictionaryTab

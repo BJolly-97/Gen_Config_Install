@@ -9,21 +9,25 @@ import pandas as pd
 import numpy as np
 import sys
 from tqdm import tqdm
-import os 
+import os
 import re
 import copy
 
-#%%
-    
+# %%
+
+
 def diff_eq(avgd, asym):
-    
+
     for i in range(len(avgd)):
         dum_list = []
         for j in range(len(asym)):
-            
-            chi = np.sqrt( ( avgd[1].iloc[i] - asym[0].iloc[j] )**2 + ( avgd[2].iloc[i] - asym[1].iloc[j] )**2 + ( avgd[3].iloc[i] - asym[2].iloc[j] )**2  )
+            chi = np.sqrt(
+                (avgd[1].iloc[i] - asym[0].iloc[j]) ** 2
+                + (avgd[2].iloc[i] - asym[1].iloc[j]) ** 2
+                + (avgd[3].iloc[i] - asym[2].iloc[j]) ** 2
+            )
             dum_list.append(chi)
-        
+
         avgd.loc[i, 1] = asym[0].iloc[dum_list.index(min(dum_list))]
         avgd.loc[i, 2] = asym[1].iloc[dum_list.index(min(dum_list))]
         avgd.loc[i, 3] = asym[2].iloc[dum_list.index(min(dum_list))]
@@ -61,28 +65,32 @@ def matrix_to_string(matrix, header=None):
     return matrix_str
 
 
-def modulo_sep(numb,base,comp):
+def modulo_sep(numb, base, comp):
     # Separates a normal integer into its base components (for a given base and number of components)
-    A=[]
-    num_work=numb
+    A = []
+    num_work = numb
     while num_work > 0:
         rem = num_work % base
-        num_work = (num_work - rem)/base
-        A.insert(0,rem)
+        num_work = (num_work - rem) / base
+        A.insert(0, rem)
     while len(A) < comp:
-        A.insert(0,0)
+        A.insert(0, 0)
     return A
-def modulo_comb(set,base,comp):
+
+
+def modulo_comb(set, base, comp):
     # Recombines a separated base into a normal integer
-    num=0
+    num = 0
     for n in range(len(set)):
-        num+=set[n]*(base**(comp-1-n))
+        num += set[n] * (base ** (comp - 1 - n))
     return num
-def reduce_comp(A,B):
+
+
+def reduce_comp(A, B):
     # Allows for a numbers to be made equivalent to each other
     # A is the original set
     # B is the equivalency
-    A1=[]
+    A1 = []
     for n in A:
         A1.append(B[n])
     return A1
@@ -102,17 +110,19 @@ def run(dict_dir, sublattice=None, rmc6f=None):
                                prefix of every file this call writes.                    (Type: str)
     """
 
-    #%%Collect relevant files and convert to dataframes
+    # %%Collect relevant files and convert to dataframes
 
     filepath = dict_dir.strip('"')
 
     sublattice_labels = None
     for stemname in os.listdir(filepath):
-        if stemname.endswith('.finsub'):
+        if stemname.endswith(".finsub"):
             sublattice_labels = stemname
 
     if sublattice_labels is None:
-        raise FileNotFoundError(f"No '.finsub' file found in '{filepath}'. Run 'dict' first to generate the dictionary files.")
+        raise FileNotFoundError(
+            f"No '.finsub' file found in '{filepath}'. Run 'dict' first to generate the dictionary files."
+        )
 
     sublab_file = open(os.path.join(filepath, sublattice_labels), "r")
     sublab_read = sublab_file.readlines()
@@ -123,7 +133,7 @@ def run(dict_dir, sublattice=None, rmc6f=None):
     if sublattice is None:
         print("\nEnter desired sublattice for analysis (e.g. 0):\n")
         for i in range(len(sublab)):
-            print(sublab.loc[i,0])
+            print(sublab.loc[i, 0])
         sub_num = str(input())
     else:
         sub_num = str(sublattice)
@@ -134,31 +144,35 @@ def run(dict_dir, sublattice=None, rmc6f=None):
 
     # Loop through files in the folder
     for stemname in os.listdir(filepath):
-        if stemname.endswith(".basis"+sub_num):
+        if stemname.endswith(".basis" + sub_num):
             basis_ext = stemname
-        if stemname.endswith(".binom"+sub_num):
+        if stemname.endswith(".binom" + sub_num):
             binom_ext = stemname
-        if stemname.endswith(".cfgdict"+sub_num):
+        if stemname.endswith(".cfgdict" + sub_num):
             clapp_ext = stemname
 
     if basis_ext is None or binom_ext is None or clapp_ext is None:
-        raise FileNotFoundError(f"No '.basis{sub_num}'/'.binom{sub_num}'/'.cfgdict{sub_num}' files found in '{filepath}' for sub-lattice {sub_num}.")
+        raise FileNotFoundError(
+            f"No '.basis{sub_num}'/'.binom{sub_num}'/'.cfgdict{sub_num}' files found in '{filepath}' for sub-lattice {sub_num}."
+        )
 
-    #%%
+    # %%
 
-    sublab = sublab[0].str.split('\t',expand=True)
-    sublab[1] = sublab[1].astype(object)  # column 1 ends up holding a list per row below - .loc[i, col] = <list> doesn't reliably store a list as one cell (pandas tries to broadcast it instead), so this uses .at[] further down as well
+    sublab = sublab[0].str.split("\t", expand=True)
+    sublab[1] = sublab[1].astype(
+        object
+    )  # column 1 ends up holding a list per row below - .loc[i, col] = <list> doesn't reliably store a list as one cell (pandas tries to broadcast it instead), so this uses .at[] further down as well
     for i in range(len(sublab)):
-        sublab.loc[i,1] = sublab.loc[i,1].replace('\n', '')
+        sublab.loc[i, 1] = sublab.loc[i, 1].replace("\n", "")
 
     for i in range(len(sublab)):
-        parts = sublab.loc[i,1].split('/')
+        parts = sublab.loc[i, 1].split("/")
 
-    # Extract only the letters from each part
-        sub_atoms = [re.findall(r'[A-Za-z]+', part)[0] for part in parts]
-        sublab.at[i,1] = sub_atoms
+        # Extract only the letters from each part
+        sub_atoms = [re.findall(r"[A-Za-z]+", part)[0] for part in parts]
+        sublab.at[i, 1] = sub_atoms
 
-    #%%
+    # %%
 
     basis = open(os.path.join(filepath, basis_ext), "r")
     basis_line_read = basis.readlines()
@@ -179,33 +193,31 @@ def run(dict_dir, sublattice=None, rmc6f=None):
     binom_df = pd.DataFrame(binom_lines)
     config_df = pd.DataFrame(config_lines)
 
+    # %%Adjust the basis set dataframe for use
 
-    #%%Adjust the basis set dataframe for use
-
-    basis_df.drop([0,1,len(basis_df)-1], inplace=True)
+    basis_df.drop([0, 1, len(basis_df) - 1], inplace=True)
     basis_df.reset_index(inplace=True)
-    basis_df.drop(['index'], axis=1,inplace=True)
+    basis_df.drop(["index"], axis=1, inplace=True)
 
-    basis_df = basis_df[0].str.split(r'\s+', expand=True)
-    basis_df.drop([0,4,5], axis=1, inplace=True)
+    basis_df = basis_df[0].str.split(r"\s+", expand=True)
+    basis_df.drop([0, 4, 5], axis=1, inplace=True)
     basis_df.columns = range(basis_df.shape[1])
 
+    # %%Adjust remaining dataframes
 
-    #%%Adjust remaining dataframes
-
-    binom_df = binom_df[0].str.split(r'\s+', expand=True)
+    binom_df = binom_df[0].str.split(r"\s+", expand=True)
     binom_df.drop([3], axis=1, inplace=True)
 
-    config_df = config_df[0].str.split(r'\s+', expand=True)
+    config_df = config_df[0].str.split(r"\s+", expand=True)
     config_df.drop([2], axis=1, inplace=True)
 
-    #%%Convert dataframes to numeric
+    # %%Convert dataframes to numeric
 
     basis_df = basis_df.astype(float)
     binom_df = binom_df.astype(int)
     config_df = config_df.astype(int)
 
-    #%%
+    # %%
 
     asym_file = None
     for stemname in os.listdir(filepath):
@@ -213,7 +225,9 @@ def run(dict_dir, sublattice=None, rmc6f=None):
             asym_file = os.path.join(filepath, stemname)
 
     if asym_file is None:
-        raise FileNotFoundError(f"No '.cellpos' file found in '{filepath}'. Run 'dict' first to generate the dictionary files.")
+        raise FileNotFoundError(
+            f"No '.cellpos' file found in '{filepath}'. Run 'dict' first to generate the dictionary files."
+        )
 
     asym_file = asym_file.strip('"')
 
@@ -227,23 +241,22 @@ def run(dict_dir, sublattice=None, rmc6f=None):
     asym_df.drop_duplicates(inplace=True)
     asym_df = asym_df.astype(float)
 
-
-    #%%
+    # %%
     ###################################################
     #### matrix_to_string / modulo_sep / modulo_comb / reduce_comp are now module-level
     #### functions (see the top of this file) so they're importable/testable on their own.
     ###################################################
-    #%%
+    # %%
 
     ####################
     ####   START CODE
     ####################
-    #filename = input( "Filename (including .ext):	")
+    # filename = input( "Filename (including .ext):	")
 
     if rmc6f is None:
         rmc6f = input("\nSelect .rmc6f file path (incl. extension):\t")
     filename = rmc6f.strip('"')
-    filenamex=filename.split(".")
+    filenamex = filename.split(".")
 
     # These lines set-up the initial matrices that will be used
     atoms = []
@@ -254,78 +267,89 @@ def run(dict_dir, sublattice=None, rmc6f=None):
     ####   Read RMC file
     ####################
 
-    if filenamex[-1]=="rmc6f":
-     	#### Loads information from .rmc6f file
-     
-         filename_stem=filename.replace("."+str(filenamex[-1]),"")
-         print("Path is "+str(filename_stem))
-         raw_file=[]
-         xyzac = open(filename)
-         lines = xyzac.readlines()
-         for n in lines:
-             raw_file.append(n.split())
-     	####
-         at_labels=[]
-         N_ats=[]
-         U=[]
-         CD=[]
-         start_no=0
-     	#### These are selecting the data lines from the header
-         for n in range(30):
-             if 'types' in raw_file[n]:
-                 if 'atoms:' in raw_file[n]:
-                     no_types=int(raw_file[n][-1])
-                 else:
-                     for n1 in range(no_types):
-                         at_labels.append(raw_file[n][-no_types+n1])
-             elif 'each' in raw_file[n]:
-                 for n1 in range(no_types):
-                     N_ats.append(int(raw_file[n][-no_types+n1]))
-             elif 'Supercell' in raw_file[n]:
-                 for n1 in range(2,5,1):
-                     U.append(int(raw_file[n][n1]))
-             elif 'Cell' in raw_file[n]:
-                 for n1 in range(2,8,1):
-                     CD.append(float(raw_file[n][n1]))
-             elif 'Atoms:' in raw_file[n]:
-                 start_no+=n+1
-         LP_a = CD[0]/U[0]
-         LP_b = CD[1]/U[1]
-         LP_c = CD[2]/U[2]
-     	######
-     	# Prints file info in running window
-         print("\nRMC6F INFO")
-         print("No of atom types = "+str(no_types))
-         print("Atom Types = "+str(at_labels))
-         print("No. of atoms = "+str(N_ats))
-         print("No. of unit cells = "+str(U))
-         print("Cell dimensions = "+str(CD))
-         print("Lattice parameters = "+str(LP_a)+" "+str(LP_b)+" "+str(LP_c))
-     	######
-     	# RMC6f atom lines come in two shapes. The tail is always "ref celli cellj cellk"
-     	# and the coords are always 3 fields, but an optional site label may sit between
-     	# the element symbol and x - bracketed ("[1]") or bare ("1"):
-     	#     "1 Fe [1] 0.13 0.03 0.16 2 0 0 0"   (10 fields)
-     	#     "1 Fe  1  0.13 0.03 0.16 2 0 0 0"   (10 fields)
-     	#     "1 Fe     0.13 0.03 0.16 2 0 0 0"   (9 fields)
-     	# so work out where the coordinates start and use that everywhere below.
-         first_atom = raw_file[start_no]
-         coord_start = 3 if len(first_atom) >= 10 else 2
-     	######
-     	# Reads the data in the file
-         for n in range(start_no,len(raw_file),1):
-             if len(raw_file[n]) < coord_start + 7:
-                 continue  # blank or truncated trailing line
-             raw.append([float(raw_file[n][coord_start]), float(raw_file[n][coord_start+1]), float(raw_file[n][coord_start+2])])
-             #coordinates.append([round((float(raw_file[n][coord_start]) - 0.5) * 2 * U[0],0), round((float(raw_file[n][coord_start+1]) - 0.5) * 2 * U[1],0), round((float(raw_file[n][coord_start+2]) - 0.5) * 2 * U[2],0)])
-             coordinates.append([float(raw_file[n][coord_start]), float(raw_file[n][coord_start+1]), float(raw_file[n][coord_start+2])])
-             atoms.append(at_labels.index(raw_file[n][1]))
+    if filenamex[-1] == "rmc6f":
+        #### Loads information from .rmc6f file
+
+        filename_stem = filename.replace("." + str(filenamex[-1]), "")
+        print("Path is " + str(filename_stem))
+        raw_file = []
+        xyzac = open(filename)
+        lines = xyzac.readlines()
+        for n in lines:
+            raw_file.append(n.split())
+        ####
+        at_labels = []
+        N_ats = []
+        U = []
+        CD = []
+        start_no = 0
+        #### These are selecting the data lines from the header
+        for n in range(30):
+            if "types" in raw_file[n]:
+                if "atoms:" in raw_file[n]:
+                    no_types = int(raw_file[n][-1])
+                else:
+                    for n1 in range(no_types):
+                        at_labels.append(raw_file[n][-no_types + n1])
+            elif "each" in raw_file[n]:
+                for n1 in range(no_types):
+                    N_ats.append(int(raw_file[n][-no_types + n1]))
+            elif "Supercell" in raw_file[n]:
+                for n1 in range(2, 5, 1):
+                    U.append(int(raw_file[n][n1]))
+            elif "Cell" in raw_file[n]:
+                for n1 in range(2, 8, 1):
+                    CD.append(float(raw_file[n][n1]))
+            elif "Atoms:" in raw_file[n]:
+                start_no += n + 1
+        LP_a = CD[0] / U[0]
+        LP_b = CD[1] / U[1]
+        LP_c = CD[2] / U[2]
+        ######
+        # Prints file info in running window
+        print("\nRMC6F INFO")
+        print("No of atom types = " + str(no_types))
+        print("Atom Types = " + str(at_labels))
+        print("No. of atoms = " + str(N_ats))
+        print("No. of unit cells = " + str(U))
+        print("Cell dimensions = " + str(CD))
+        print("Lattice parameters = " + str(LP_a) + " " + str(LP_b) + " " + str(LP_c))
+        ######
+        # RMC6f atom lines come in two shapes. The tail is always "ref celli cellj cellk"
+        # and the coords are always 3 fields, but an optional site label may sit between
+        # the element symbol and x - bracketed ("[1]") or bare ("1"):
+        #     "1 Fe [1] 0.13 0.03 0.16 2 0 0 0"   (10 fields)
+        #     "1 Fe  1  0.13 0.03 0.16 2 0 0 0"   (10 fields)
+        #     "1 Fe     0.13 0.03 0.16 2 0 0 0"   (9 fields)
+        # so work out where the coordinates start and use that everywhere below.
+        first_atom = raw_file[start_no]
+        coord_start = 3 if len(first_atom) >= 10 else 2
+        ######
+        # Reads the data in the file
+        for n in range(start_no, len(raw_file), 1):
+            if len(raw_file[n]) < coord_start + 7:
+                continue  # blank or truncated trailing line
+            raw.append(
+                [
+                    float(raw_file[n][coord_start]),
+                    float(raw_file[n][coord_start + 1]),
+                    float(raw_file[n][coord_start + 2]),
+                ]
+            )
+            # coordinates.append([round((float(raw_file[n][coord_start]) - 0.5) * 2 * U[0],0), round((float(raw_file[n][coord_start+1]) - 0.5) * 2 * U[1],0), round((float(raw_file[n][coord_start+2]) - 0.5) * 2 * U[2],0)])
+            coordinates.append(
+                [
+                    float(raw_file[n][coord_start]),
+                    float(raw_file[n][coord_start + 1]),
+                    float(raw_file[n][coord_start + 2]),
+                ]
+            )
+            atoms.append(at_labels.index(raw_file[n][1]))
     else:
-     	print("Don't recognise filetype, so have to stop...")
-     	exit()
+        print("Don't recognise filetype, so have to stop...")
+        exit()
 
-
-    #%%
+    # %%
 
     ##  Store atoms as separate dataframe?
 
@@ -333,33 +357,31 @@ def run(dict_dir, sublattice=None, rmc6f=None):
     ####### CALCULATION
     ########################
 
-    #%% 	
-    #These lines create the dictionary of atom coordinates in the configuration, from which we can reference the 12 nn
+    # %%
+    # These lines create the dictionary of atom coordinates in the configuration, from which we can reference the 12 nn
 
     for i in range(len(raw_file)):
-        if 'Atoms:' in raw_file[i]:
+        if "Atoms:" in raw_file[i]:
             a_c_i = i
-        
 
-    atom_lines = [row for row in raw_file[a_c_i+1:] if len(row) >= coord_start + 7]
+    atom_lines = [row for row in raw_file[a_c_i + 1 :] if len(row) >= coord_start + 7]
     master_df_main = pd.DataFrame(atom_lines)
     # Keep element symbol (col 1), x/y/z, ref number and cell i/j/k; drop the atom id
     # (col 0) and - when the file has one - the bracketed site label (col 2). coord_start
     # (2 or 3) was worked out from the first atom line above.
     keep_cols = [1] + list(range(coord_start, coord_start + 7))
     master_df_main = master_df_main[keep_cols]
-    master_df_main.columns=range(master_df_main.shape[1])
+    master_df_main.columns = range(master_df_main.shape[1])
 
     label_to_index = {label: j for j, label in enumerate(at_labels)}
     master_df_main[0] = master_df_main[0].map(label_to_index)
 
-    for i in [0,4,5,6,7]:
-        master_df_main[i]=master_df_main[i].astype(int)
-    for i in [1,2,3]:
-        master_df_main[i]=master_df_main[i].astype(float)
-    
+    for i in [0, 4, 5, 6, 7]:
+        master_df_main[i] = master_df_main[i].astype(int)
+    for i in [1, 2, 3]:
+        master_df_main[i] = master_df_main[i].astype(float)
 
-    #%%
+    # %%
 
     master_df = copy.deepcopy(master_df_main)
     sub_num = int(sub_num)
@@ -368,35 +390,40 @@ def run(dict_dir, sublattice=None, rmc6f=None):
 
     index_nums = []
 
-    for i in range(len(sublab.loc[sub_num,1])):
-        index_nums.append(at_labels.index(sublab.loc[sub_num,1][i]))
+    for i in range(len(sublab.loc[sub_num, 1])):
+        index_nums.append(at_labels.index(sublab.loc[sub_num, 1][i]))
 
     master_df = master_df[master_df[0].isin(index_nums)]
     master_df.reset_index(inplace=True)
-    master_df.drop(['index'], axis=1,inplace=True)
+    master_df.drop(["index"], axis=1, inplace=True)
 
-    #%%
+    # %%
 
     uniq_types2 = sorted(master_df[0].unique())
 
     if len(uniq_types2) == 1:
-        print('\n\nSub-lattice '+str(sub_num)+' contains a single atomic species. Configurational analysis is therefore deemed trivial, and is halted.\n')
+        print(
+            "\n\nSub-lattice "
+            + str(sub_num)
+            + " contains a single atomic species. Configurational analysis is therefore deemed trivial, and is halted.\n"
+        )
         sys.exit()
 
-    #%% Re-mapping atom types on sub-lattices
+    # %% Re-mapping atom types on sub-lattices
 
     mapping = {old: new for new, old in enumerate(uniq_types2)}
-    inv_mapping = {new: old for old, new in mapping.items()}  # to recover original at_labels index later (e.g. for the _mb.rmc6f writer)
+    inv_mapping = {
+        new: old for old, new in mapping.items()
+    }  # to recover original at_labels index later (e.g. for the _mb.rmc6f writer)
 
     # Apply the mapping to relabel the column
     master_df[0] = master_df[0].map(mapping)
 
-    
-    #%%Calculations
+    # %%Calculations
 
-    for i in [1,2,3]:
-        master_df[i+7]=0
-        master_df[i+7]+=(master_df[i]*U[i-1])-master_df[i+4]
+    for i in [1, 2, 3]:
+        master_df[i + 7] = 0
+        master_df[i + 7] += (master_df[i] * U[i - 1]) - master_df[i + 4]
 
     # Reverted back to the original one-sided clamp (2026-08-26). The periodic wrap tried
     # here previously (`disp - round(disp)`) assumed this quantity was a fractional coordinate
@@ -409,40 +436,41 @@ def run(dict_dir, sublattice=None, rmc6f=None):
     # found for every atom, which is what was collapsing every histogram onto CC=1/-1). The
     # original clamp gives all 32,000 atoms their correct 12 real neighbours.
     for i in range(len(master_df)):
-        for j in [1,2,3]:
-            if master_df[j+7].iloc[i] > 1:
-                master_df.loc[i, j+7] = 0
+        for j in [1, 2, 3]:
+            if master_df[j + 7].iloc[i] > 1:
+                master_df.loc[i, j + 7] = 0
 
-
-    #%%Averaging the offsite displacements to find ideal lattice positions
+    # %%Averaging the offsite displacements to find ideal lattice positions
 
     vals_list = sorted(master_df[4].unique())
-    avgd_df = master_df.groupby([4])[[8,9,10]].mean().reset_index()
-    avgd_df.columns=range(avgd_df.shape[1])
-    for i in [1,2,3]:
+    avgd_df = master_df.groupby([4])[[8, 9, 10]].mean().reset_index()
+    avgd_df.columns = range(avgd_df.shape[1])
+    for i in [1, 2, 3]:
         avgd_df[i] = round(avgd_df[i], 4)
 
-    #%%#This section takes the averaged lattice positions, from the section above, and compares them to the asymmetric unit cell taken from the configurational code
+    # %%#This section takes the averaged lattice positions, from the section above, and compares them to the asymmetric unit cell taken from the configurational code
 
     diff_eq(avgd_df, asym_df)
 
-    #%%#Creates the 'fine supercell coordinates'
+    # %%#Creates the 'fine supercell coordinates'
 
-    for i in tqdm(range(len(master_df)), desc="Generating supercell coordinates for selected sub-lattice"):
+    for i in tqdm(
+        range(len(master_df)), desc="Generating supercell coordinates for selected sub-lattice"
+    ):
         for j in range(len(avgd_df)):
             if master_df[4].loc[i] == avgd_df[0].iloc[j]:
-                master_df.loc[i, 8] = master_df[5].iloc[i]+avgd_df[1].iloc[j]
-                master_df.loc[i, 9] = master_df[6].iloc[i]+avgd_df[2].iloc[j]
-                master_df.loc[i, 10] = master_df[7].iloc[i]+avgd_df[3].iloc[j]
+                master_df.loc[i, 8] = master_df[5].iloc[i] + avgd_df[1].iloc[j]
+                master_df.loc[i, 9] = master_df[6].iloc[i] + avgd_df[2].iloc[j]
+                master_df.loc[i, 10] = master_df[7].iloc[i] + avgd_df[3].iloc[j]
 
+    NN_list_df = master_df[[0, 8, 9, 10]].copy()
+    NN_list_df.columns = range(NN_list_df.shape[1])
 
-    NN_list_df = master_df[[0,8,9,10]].copy()
-    NN_list_df.columns=range(NN_list_df.shape[1])
+    # %%
 
-
-    #%%
-
-    NN_list_df[4] = None  # not "" - as of pandas 3.x that would create a strict string-dtype column, and this cell later holds a list (see the Modulo_comb section below)
+    NN_list_df[4] = (
+        None  # not "" - as of pandas 3.x that would create a strict string-dtype column, and this cell later holds a list (see the Modulo_comb section below)
+    )
 
     # Precompute combinations of NN_list_df columns 1, 2, and 3 into tuples for fast lookup
     NN_combined = list(zip(NN_list_df[1], NN_list_df[2], NN_list_df[3]))
@@ -452,30 +480,31 @@ def run(dict_dir, sublattice=None, rmc6f=None):
 
     # Loop through rows of NN_list_df
     for i in tqdm(range(len(NN_list_df)), desc="Generating nearest neighbour atom-type lists"):
-    
         # Get the current row's values from columns 1, 2, and 3
         dummy_list = NN_list_df.iloc[i, [1, 2, 3]].values
-    
+
         # Add the current row values to the entire basis_df, applying it row-wise
         dummy_NN = basis_df.values + dummy_list  # Shape (12, 3) + (3,)
-    
+
         for j in range(len(dummy_NN)):
-            for k in [0,1,2]:
+            for k in [0, 1, 2]:
                 if dummy_NN[j][k] >= U[k]:
-                    dummy_NN[j][k]=dummy_NN[j][k]-U[k]
+                    dummy_NN[j][k] = dummy_NN[j][k] - U[k]
                 elif dummy_NN[j][k] < 0.0:
-                    dummy_NN[j][k]=dummy_NN[j][k]+U[k]
-    
+                    dummy_NN[j][k] = dummy_NN[j][k] + U[k]
+
         # Convert the dummy_NN into tuples for comparison
         dummy_combined = list(zip(dummy_NN[:, 0], dummy_NN[:, 1], dummy_NN[:, 2]))
-    
-        # Find matching rows in NN_list_df using the lookup_dict
-        NN_list = [lookup_dict[dummy_row] for dummy_row in dummy_combined if dummy_row in lookup_dict]
-    
-        # Store the matching results as a comma-separated string
-        NN_list_df.at[i, 4] = ','.join(map(str, NN_list))
 
-    #%%$Trying to deal with no. types issue
+        # Find matching rows in NN_list_df using the lookup_dict
+        NN_list = [
+            lookup_dict[dummy_row] for dummy_row in dummy_combined if dummy_row in lookup_dict
+        ]
+
+        # Store the matching results as a comma-separated string
+        NN_list_df.at[i, 4] = ",".join(map(str, NN_list))
+
+    # %%$Trying to deal with no. types issue
 
     ######################################
 
@@ -483,152 +512,156 @@ def run(dict_dir, sublattice=None, rmc6f=None):
 
     ######################################
 
-    
-    #%%Performing the modulo_comb on the newly generated lists
+    # %%Performing the modulo_comb on the newly generated lists
 
-    NN_list_df[5] = None  # not "" - this cell holds an int (see astype(int) below); "" would create a strict string-dtype column on pandas 3.x and reject the int assignment
+    NN_list_df[5] = (
+        None  # not "" - this cell holds an int (see astype(int) below); "" would create a strict string-dtype column on pandas 3.x and reject the int assignment
+    )
 
-    for i in tqdm(range(len(NN_list_df)), desc='Modulo_comb'):
+    for i in tqdm(range(len(NN_list_df)), desc="Modulo_comb"):
         NN_list_df.at[i, 4] = list(NN_list_df.loc[i, 4])
-        NN_list_df.at[i, 4] = [int(j) for j in NN_list_df.loc[i, 4] if j != ',']
-        NN_list_df.at[i, 5] = modulo_comb(NN_list_df.loc[i, 4], no_types_new, len(basis_df)) ########ASSUMING AT THIS POINT YOU NEED THE TOTAL NUMBER OF ATOMS
+        NN_list_df.at[i, 4] = [int(j) for j in NN_list_df.loc[i, 4] if j != ","]
+        NN_list_df.at[i, 5] = modulo_comb(
+            NN_list_df.loc[i, 4], no_types_new, len(basis_df)
+        )  ########ASSUMING AT THIS POINT YOU NEED THE TOTAL NUMBER OF ATOMS
 
-    NN_list_df[5] =  NN_list_df[5].astype(int)
+    NN_list_df[5] = NN_list_df[5].astype(int)
 
+    # %%
 
-    #%%
+    NN_list_df[6] = (
+        None  # not "" - this cell holds a list (see A1 below); "" would create a strict string-dtype column on pandas 3.x and reject the list assignment
+    )
 
-    NN_list_df[6] = None  # not "" - this cell holds a list (see A1 below); "" would create a strict string-dtype column on pandas 3.x and reject the list assignment
+    # Does the conversion from higher order configurations to binary Clapp configurations
+    for n in tqdm(
+        range(len(NN_list_df)),
+        desc="Conversion from higher order configurations to binary configs:",
+    ):
+        A = []
+        for m1 in range(1, (2**no_types_new) - 1, 1):
+            red = modulo_sep(m1, 2, no_types_new)
+            new_comp = reduce_comp(NN_list_df[4].loc[n], red)
+            new_comp_no = int(modulo_comb(new_comp, 2, len(basis_df)))
+            if red[NN_list_df[0].iloc[n]] == 0:
+                A.append(config_df[1].iloc[new_comp_no])
+            else:
+                A.append(-config_df[1].iloc[new_comp_no])
+        A1 = []
+        # KNOWN BUG, NOT YET FIXED (see investigation notes) - `binom_df.loc[0,0]` here reads
+        # back the *minimum* CC from the already-sorted .binomN file (not the always-positive
+        # CC=1 sentinel this comparison meant in dictionary.py's original in-memory
+        # DataFrame), so this branch almost never triggers as intended. A first attempt to fix
+        # it (comparing against a fixed 1 instead) made real 12-NN data collapse onto a single
+        # CC bin - worse than the original, not better - so the correct selection rule is not
+        # simply "is A[m2] >= 1". Left as the original (buggy but previously-shipped) behaviour
+        # pending a correct derivation, rather than shipping a second guess that's already been
+        # shown wrong on real data.
+        for m2 in range(int(len(A) / 2)):
+            if A[m2] <= binom_df.loc[0, 0] - 1:
+                A1.append(A[len(A) - 1 - m2])
+            else:
+                A1.append(A[m2])
+        NN_list_df.at[n, 6] = A1
 
-    #Does the conversion from higher order configurations to binary Clapp configurations
-    for n in tqdm(range(len(NN_list_df)), desc='Conversion from higher order configurations to binary configs:'):
-     	A=[]
-     	for m1 in range(1,(2**no_types_new)-1,1):
-             red = modulo_sep(m1,2,no_types_new)
-             new_comp = reduce_comp(NN_list_df[4].loc[n],red)
-             new_comp_no = int(modulo_comb(new_comp,2,len(basis_df)))
-             if red[NN_list_df[0].iloc[n]]==0:
-                 A.append(config_df[1].iloc[new_comp_no])
-             else:
-                 A.append(-config_df[1].iloc[new_comp_no])
-     	A1=[]
-     	# KNOWN BUG, NOT YET FIXED (see investigation notes) - `binom_df.loc[0,0]` here reads
-     	# back the *minimum* CC from the already-sorted .binomN file (not the always-positive
-     	# CC=1 sentinel this comparison meant in dictionary.py's original in-memory
-     	# DataFrame), so this branch almost never triggers as intended. A first attempt to fix
-     	# it (comparing against a fixed 1 instead) made real 12-NN data collapse onto a single
-     	# CC bin - worse than the original, not better - so the correct selection rule is not
-     	# simply "is A[m2] >= 1". Left as the original (buggy but previously-shipped) behaviour
-     	# pending a correct derivation, rather than shipping a second guess that's already been
-     	# shown wrong on real data.
-     	for m2 in range(int(len(A)/2)):
-             if A[m2]<=binom_df.loc[0,0]-1:
-                 A1.append(A[len(A)-1-m2])
-             else:
-                 A1.append(A[m2])
-     	NN_list_df.at[n, 6] = A1
+    # %%
 
+    # Makes the Clapp configurations histogram
+    cond_num = int(((2**no_types_new) - 2) / 2)
+    config_hist = []
 
-    #%%
+    for n in range(binom_df[0].iloc[0], binom_df[0].iloc[-1] + 1, 1):
+        A = [n]
+        for n1 in range(cond_num):
+            A.append([0, 0, 0])
+        config_hist.append(A)
 
-    #Makes the Clapp configurations histogram
-    cond_num=int(((2**no_types_new)-2)/2)
-    config_hist=[]
+    # %%
+    # Counts the binary Clapp configurations into the histogram
+    for n in tqdm(
+        range(len(NN_list_df)), desc="Counting binary configurations into the histogram:"
+    ):
+        # print n
+        for n1 in range(1, cond_num + 1, 1):
+            a1 = NN_list_df[6].iloc[n][n1 - 1]  # n[3][n1-1]
 
+            config_hist[a1 - binom_df[0].iloc[0]][n1][2] += 1
+            red = modulo_sep(n1, 2, no_types_new)
+            config_hist[int(a1 - binom_df[0].iloc[0])][int(n1)][
+                int(red[NN_list_df[0].iloc[n]])
+            ] += 1
 
-    for n in range(binom_df[0].iloc[0], binom_df[0].iloc[-1]+1,1):
-     	A=[n]
-     	for n1 in range(cond_num):
-             A.append([0,0,0])
-     	config_hist.append(A)
+    # %%
 
-    #%%
-    #Counts the binary Clapp configurations into the histogram
-    for n in tqdm(range(len(NN_list_df)), desc='Counting binary configurations into the histogram:'):
-     	#print n
-     	for n1 in range(1,cond_num+1,1):
-         
-             a1=NN_list_df[6].iloc[n][n1-1]#n[3][n1-1]
-
-             config_hist[a1-binom_df[0].iloc[0]][n1][2]+=1
-             red = modulo_sep(n1,2,no_types_new)
-             config_hist[int(a1-binom_df[0].iloc[0])][int(n1)][int(red[NN_list_df[0].iloc[n]])]+=1
-
-    
-    #%%
-
-
-    #%%$Trying to deal with no. types issue
+    # %%$Trying to deal with no. types issue
 
     ######################################
 
-    #TYPES ISSUE ENDS HERE?
+    # TYPES ISSUE ENDS HERE?
 
     ######################################
 
-
-    #%%
+    # %%
 
     ##################################################################
     ######## THESE LINES CALCULATE THE ENHANCEMENT FACTORS
     ##################################################################
 
+    # Calculates the EF for the configurations
+    for m1 in range(cond_num):
+        Na = 0
+        Nb = 0
+        Ntot = 0
+        for n in range(len(config_hist)):
+            Na += config_hist[n][m1 + 1][0]
+            Nb += config_hist[n][m1 + 1][1]
+            Ntot += config_hist[n][m1 + 1][2]
+        for n in range(len(config_hist)):
+            config_hist[n][m1 + 1].append(float(config_hist[n][m1 + 1][0]) / Na)
+            config_hist[n][m1 + 1].append(float(config_hist[n][m1 + 1][1]) / Nb)
+            config_hist[n][m1 + 1].append(float(config_hist[n][m1 + 1][2]) / Ntot)
+        X_b = float(Nb) / (float(Na) + float(Nb))
+        X_a = 1 - X_b
+        ##These lines calculate the binomial value for this specific case
+        for n in range(len(binom_df)):
+            # pB is the probability of finding the Clapp config around an atom of type B
+            pB = (X_b ** (len(basis_df) - binom_df[2].iloc[n])) * (X_a ** (binom_df[2].iloc[n]))
+            # pA is the probability of finding the Clapp config around an atom of type A
+            pA = (X_b ** (binom_df[2].iloc[n])) * (X_a ** (len(basis_df) - binom_df[2].iloc[n]))
+            pint = (pB * X_b) + (pA * X_a)
+            #### Adds Binomial probability to occ in [6-8]
+            config_hist[n][m1 + 1].append(pA * binom_df[1].iloc[n])
+            config_hist[n][m1 + 1].append(pB * binom_df[1].iloc[n])
+            config_hist[n][m1 + 1].append(pint * binom_df[1].iloc[n])
 
-    #Calculates the EF for the configurations
-    for m1 in range(cond_num): 
-     	Na=0
-     	Nb=0
-     	Ntot=0
-     	for n in range(len(config_hist)):
-             Na+=config_hist[n][m1+1][0]
-             Nb+=config_hist[n][m1+1][1]
-             Ntot+=config_hist[n][m1+1][2]
-     	for n in range(len(config_hist)):
-             config_hist[n][m1+1].append(float(config_hist[n][m1+1][0])/Na)
-             config_hist[n][m1+1].append(float(config_hist[n][m1+1][1])/Nb)
-             config_hist[n][m1+1].append(float(config_hist[n][m1+1][2])/Ntot)
-     	X_b=(float(Nb)/(float(Na)+float(Nb)))
-     	X_a=1-X_b
-     	##These lines calculate the binomial value for this specific case
-     	for n in range(len(binom_df)):
-    		#pB is the probability of finding the Clapp config around an atom of type B
-             pB= (X_b**(len(basis_df)-binom_df[2].iloc[n]))*(X_a**(binom_df[2].iloc[n]))
-    		#pA is the probability of finding the Clapp config around an atom of type A
-             pA= (X_b**(binom_df[2].iloc[n]))*(X_a**(len(basis_df)-binom_df[2].iloc[n]))
-             pint= (pB*X_b)+(pA*X_a)
-    		#### Adds Binomial probability to occ in [6-8]
-             config_hist[n][m1+1].append(pA*binom_df[1].iloc[n])
-             config_hist[n][m1+1].append(pB*binom_df[1].iloc[n])
-             config_hist[n][m1+1].append(pint*binom_df[1].iloc[n])
- 	
-     	##### Adds Binomial predicted number in [9-11]
-     	for n in config_hist:
-    		#print n
-             n[m1+1].append(n[m1+1][6]*Na)
-             n[m1+1].append(n[m1+1][7]*Nb)
-             n[m1+1].append(n[m1+1][8]*Ntot)
-     	#### Adds difference in number in [12-14]
-     	#### Adds binomial stdev in [15-17]
-     	for n in config_hist:
-             n[m1+1].append(n[m1+1][0]-n[m1+1][9])
-             n[m1+1].append(n[m1+1][1]-n[m1+1][10])
-             n[m1+1].append(n[m1+1][2]-n[m1+1][11])
-             n[m1+1].append((n[m1+1][9]*(1-n[m1+1][6]))**(0.5))
-             n[m1+1].append((n[m1+1][10]*(1-n[m1+1][7]))**(0.5))
-             n[m1+1].append((n[m1+1][11]*(1-n[m1+1][8]))**(0.5))
-     	##### Adds EF in [18-20]
-     	for n in config_hist:
-             if n[0]==0:
-                 n[m1+1].append(0)
-                 n[m1+1].append(0)
-                 n[m1+1].append(0)
-             else:
-                 n[m1+1].append(n[m1+1][12]/n[m1+1][15])
-                 n[m1+1].append(n[m1+1][13]/n[m1+1][16])
-                 n[m1+1].append(n[m1+1][14]/n[m1+1][17])
-    		#print n
+        ##### Adds Binomial predicted number in [9-11]
+        for n in config_hist:
+            # print n
+            n[m1 + 1].append(n[m1 + 1][6] * Na)
+            n[m1 + 1].append(n[m1 + 1][7] * Nb)
+            n[m1 + 1].append(n[m1 + 1][8] * Ntot)
+        #### Adds difference in number in [12-14]
+        #### Adds binomial stdev in [15-17]
+        for n in config_hist:
+            n[m1 + 1].append(n[m1 + 1][0] - n[m1 + 1][9])
+            n[m1 + 1].append(n[m1 + 1][1] - n[m1 + 1][10])
+            n[m1 + 1].append(n[m1 + 1][2] - n[m1 + 1][11])
+            n[m1 + 1].append((n[m1 + 1][9] * (1 - n[m1 + 1][6])) ** (0.5))
+            n[m1 + 1].append((n[m1 + 1][10] * (1 - n[m1 + 1][7])) ** (0.5))
+            n[m1 + 1].append((n[m1 + 1][11] * (1 - n[m1 + 1][8])) ** (0.5))
+        ##### Adds EF in [18-20]
+        for n in config_hist:
+            if n[0] == 0:
+                n[m1 + 1].append(0)
+                n[m1 + 1].append(0)
+                n[m1 + 1].append(0)
+            else:
+                n[m1 + 1].append(n[m1 + 1][12] / n[m1 + 1][15])
+                n[m1 + 1].append(n[m1 + 1][13] / n[m1 + 1][16])
+                n[m1 + 1].append(n[m1 + 1][14] / n[m1 + 1][17])
+        # print n
 
-    #%%
+    # %%
 
     index_sort = sorted(index_nums)
 
@@ -637,110 +670,125 @@ def run(dict_dir, sublattice=None, rmc6f=None):
     #############################
 
     ###########Move back code results here###############
-    #This section generates a second .rmc6f file with all atoms located on their ideal lattice positions.
+    # This section generates a second .rmc6f file with all atoms located on their ideal lattice positions.
 
     mb_df = copy.deepcopy(master_df)
-    for i in [1,2,3]:
-        mb_df[i] = mb_df[i+7]
-        del mb_df[i+7]
-
+    for i in [1, 2, 3]:
+        mb_df[i] = mb_df[i + 7]
+        del mb_df[i + 7]
 
     inserts = [at_labels[inv_mapping[idx]] for idx in mb_df[0]]
-            
 
     mb_df.insert(0, "NewCol", inserts)
-    mb_df.columns = [int(i) for i in range(len(mb_df.columns))] 
+    mb_df.columns = [int(i) for i in range(len(mb_df.columns))]
 
-    mb_df.index=mb_df.index+1
+    mb_df.index = mb_df.index + 1
 
-    for i in [2,3,4]:
-        mb_df[i] = mb_df[i]/(U[i-2])
+    for i in [2, 3, 4]:
+        mb_df[i] = mb_df[i] / (U[i - 2])
 
-    outfile = open(filename_stem+"_mb.rmc6f", 'w')
-    for i in range(a_c_i+1):
+    outfile = open(filename_stem + "_mb.rmc6f", "w")
+    for i in range(a_c_i + 1):
         outfile.write(lines[i])
     outfile.close()
 
     mb_df.to_string()
-    with open(filename_stem+"_mb.rmc6f", mode='a') as f:
+    with open(filename_stem + "_mb.rmc6f", mode="a") as f:
         f.write(mb_df.to_string(header=False))
 
-    #%%
+    # %%
 
-    #These lines create the _EF.clapp file with the Enhancement factor data in
-    outfile = open (filename_stem+"_sub"+str(sub_num)+'_EF.clapp', 'w')
-    outfile.write('Enhancement Factor\n\n')
-    outfile.write('Original Filename: '+filename+'\n')
+    # These lines create the _EF.clapp file with the Enhancement factor data in
+    outfile = open(filename_stem + "_sub" + str(sub_num) + "_EF.clapp", "w")
+    outfile.write("Enhancement Factor\n\n")
+    outfile.write("Original Filename: " + filename + "\n")
     for n in index_nums:
-     	outfile.write('No. of '+at_labels[n]+' atoms'+'('+str(cond_num-n)+'):	'+str(N_ats[n])+'\n')
-    outfile.write('No. of unit cells in x:	'+ str(U[0]) +'\n')
-    outfile.write('No. of unit cells in y:	'+ str(U[1]) +'\n')
-    outfile.write('No. of unit cells in z:	'+ str(U[2]) +'\n\n')
+        outfile.write(
+            "No. of "
+            + at_labels[n]
+            + " atoms"
+            + "("
+            + str(cond_num - n)
+            + "):	"
+            + str(N_ats[n])
+            + "\n"
+        )
+    outfile.write("No. of unit cells in x:	" + str(U[0]) + "\n")
+    outfile.write("No. of unit cells in y:	" + str(U[1]) + "\n")
+    outfile.write("No. of unit cells in z:	" + str(U[2]) + "\n\n")
     # Make Column Header
-    header=["CC"]
-    for n in range(1,cond_num+1,1):
-     	header.append(str(no_types_new)+'_'+str(n)+'n_A')
-     	header.append(str(no_types_new)+'_'+str(n)+'n_B')
-     	header.append(str(no_types_new)+'_'+str(n)+'n_Tot')
-    for n in range(1,cond_num+1,1):
-     	header.append(str(no_types_new)+'_'+str(n)+'EF_A')
-     	header.append(str(no_types_new)+'_'+str(n)+'EF_B')
-     	header.append(str(no_types_new)+'_'+str(n)+'EF_Tot')
+    header = ["CC"]
+    for n in range(1, cond_num + 1, 1):
+        header.append(str(no_types_new) + "_" + str(n) + "n_A")
+        header.append(str(no_types_new) + "_" + str(n) + "n_B")
+        header.append(str(no_types_new) + "_" + str(n) + "n_Tot")
+    for n in range(1, cond_num + 1, 1):
+        header.append(str(no_types_new) + "_" + str(n) + "EF_A")
+        header.append(str(no_types_new) + "_" + str(n) + "EF_B")
+        header.append(str(no_types_new) + "_" + str(n) + "EF_Tot")
     # Make body to output
-    for_output=[]
+    for_output = []
     for n in config_hist:
-     	A1=[]
-     	A1.append(n[0])
-     	for n1 in range(1,len(n)):
-             A1.append(n[n1][0])
-             A1.append(n[n1][1])
-             A1.append(n[n1][2])
-     	for n1 in range(1,len(n)):
-             A1.append(n[n1][18])
-             A1.append(n[n1][19])
-             A1.append(n[n1][20])
-     	for_output.append(A1)
+        A1 = []
+        A1.append(n[0])
+        for n1 in range(1, len(n)):
+            A1.append(n[n1][0])
+            A1.append(n[n1][1])
+            A1.append(n[n1][2])
+        for n1 in range(1, len(n)):
+            A1.append(n[n1][18])
+            A1.append(n[n1][19])
+            A1.append(n[n1][20])
+        for_output.append(A1)
     # Output body
     result = matrix_to_string(for_output, header)
     outfile.write(result)
-    outfile.close ()
+    outfile.close()
 
     #############################
     ####### OUTPUTTING RESULTS - CC Numbers
     #############################
-    #These lines create the .clapp file heading
-    outfile2 = open (filename_stem+"_sub"+str(sub_num)+'.clapp', 'w')
-    outfile2.write('Clapp Configurations\n\n')
-    outfile2.write('Original Filename: '+filename+'\n')
+    # These lines create the .clapp file heading
+    outfile2 = open(filename_stem + "_sub" + str(sub_num) + ".clapp", "w")
+    outfile2.write("Clapp Configurations\n\n")
+    outfile2.write("Original Filename: " + filename + "\n")
 
     for n in index_nums:
-     	outfile2.write('No. of '+at_labels[n]+' atoms'+'('+str(cond_num-n)+'):	'+str(N_ats[n])+'\n')
-    outfile2.write('No. of unit cells in x:	'+ str(U[0]) +'\n')
-    outfile2.write('No. of unit cells in y:	'+ str(U[1]) +'\n')
-    outfile2.write('No. of unit cells in z:	'+ str(U[2]) +'\n\n')
+        outfile2.write(
+            "No. of "
+            + at_labels[n]
+            + " atoms"
+            + "("
+            + str(cond_num - n)
+            + "):	"
+            + str(N_ats[n])
+            + "\n"
+        )
+    outfile2.write("No. of unit cells in x:	" + str(U[0]) + "\n")
+    outfile2.write("No. of unit cells in y:	" + str(U[1]) + "\n")
+    outfile2.write("No. of unit cells in z:	" + str(U[2]) + "\n\n")
     # Make Column Header
-    header2=["X","Y","Z","At"]
-    header2.append(str(no_types_new)+'C')
+    header2 = ["X", "Y", "Z", "At"]
+    header2.append(str(no_types_new) + "C")
 
-    for n in range(1,cond_num+1,1):
-     	header2.append(str(no_types_new)+'_'+str(n)+'C') 
+    for n in range(1, cond_num + 1, 1):
+        header2.append(str(no_types_new) + "_" + str(n) + "C")
     # Make body to output
-    for_output2=[]
+    for_output2 = []
 
     for n in range(len(NN_list_df)):
-     	A1=[]
-     	for n1 in range(3):
-             A1.append((NN_list_df[n1+1].iloc[n]/(U[n1])))
-     	A1.append(NN_list_df[0].iloc[n])
-     	A1.append(NN_list_df[5].iloc[n])
-     	for n1 in range(len(NN_list_df[6].iloc[n])):
-             A1.append(NN_list_df[6].iloc[n][n1])
-     	for_output2.append(A1)
+        A1 = []
+        for n1 in range(3):
+            A1.append((NN_list_df[n1 + 1].iloc[n] / (U[n1])))
+        A1.append(NN_list_df[0].iloc[n])
+        A1.append(NN_list_df[5].iloc[n])
+        for n1 in range(len(NN_list_df[6].iloc[n])):
+            A1.append(NN_list_df[6].iloc[n][n1])
+        for_output2.append(A1)
     # Output body
     result2 = matrix_to_string(for_output2, header2)
     outfile2.write(result2)
-    outfile2.close ()
-
+    outfile2.close()
 
     ##############################
     ######## SAVE PLOTS
@@ -773,7 +821,7 @@ def run(dict_dir, sublattice=None, rmc6f=None):
         if len(groups) == 2 and min(len(groups[0]), len(groups[1])) == 1:
             lone = groups[0][0] if len(groups[0]) == 1 else groups[1][0]
             return f"{lone}:Ψ"
-        return ':'.join('-'.join(group) for group in groups)
+        return ":".join("-".join(group) for group in groups)
 
     def _pseudo_binary_label(n1):
         """
@@ -794,77 +842,126 @@ def run(dict_dir, sublattice=None, rmc6f=None):
         return title, group_a, group_b
 
     for m1 in range(cond_num):
-     	partition_title, _group_a, _group_b = _pseudo_binary_label(m1 + 1)
-     	label_a = '-'.join(_group_a)
-     	label_b = '-'.join(_group_b)
-     	xDATvalues=[]
-     	yDATvalues=[]
-     	xDATAvalues=[]
-     	yDATAvalues=[]
-     	xDATBvalues=[]
-     	yDATBvalues=[]
-     	for n1 in range(len(config_hist)):
-             xDATvalues.append(config_hist[n1][0])
-             yDATvalues.append(config_hist[n1][m1+1][20])
-             xDATAvalues.append(config_hist[n1][0])
-             yDATAvalues.append(config_hist[n1][m1+1][18])
-             xDATBvalues.append(config_hist[n1][0])
-             yDATBvalues.append(config_hist[n1][m1+1][19])
-     	#print max(yDATvalues)
-     	fig = Figure()
-     	ax = fig.add_subplot()
-     	ax.bar(xDATvalues,yDATvalues,color='red')
-     	ax.axis([binom_df[0].iloc[0],binom_df[0].iloc[-1],min(yDATvalues)-0.5,max(yDATvalues)+0.5])
-     	ax.axhline(y=3, color='black', linestyle='dashed', linewidth=1)
-     	ax.axhline(y=-3, color='black', linestyle='dashed', linewidth=1)
-     	ax.set_title(partition_title)
-     	ax.set_xlabel("Configuration (CC)")
-     	ax.set_ylabel("Enhancement Factor (β)")
-     	fig.savefig(filename_stem+"_"+str(m1+1)+"C_sub"+str(sub_num)+"_EF.png")
-     	#
-     	fig = Figure()
-     	ax = fig.add_subplot()
-     	ax.bar(xDATAvalues,yDATAvalues,color='blue')
-     	ax.axis([binom_df[0].iloc[0],binom_df[0].iloc[-1],min(yDATAvalues)-0.5,max(yDATAvalues)+0.5])
-     	ax.axhline(y=3, color='black', linestyle='dashed', linewidth=1)
-     	ax.axhline(y=-3, color='black', linestyle='dashed', linewidth=1)
-     	ax.set_title(partition_title+"\ncentred on "+label_a)
-     	ax.set_xlabel("Configuration (CC)")
-     	ax.set_ylabel("Enhancement Factor (β)")
-     	fig.savefig(filename_stem+"_"+str(m1+1)+"C_sub"+str(sub_num)+"_EF_A.png")
-     	#
-     	fig = Figure()
-     	ax = fig.add_subplot()
-     	ax.bar(xDATBvalues,yDATBvalues,color='green')
-     	ax.axis([binom_df[0].iloc[0],binom_df[0].iloc[-1],min(yDATBvalues)-0.5,max(yDATBvalues)+0.5])
-     	ax.axhline(y=3, color='black', linestyle='dashed', linewidth=1)
-     	ax.axhline(y=-3, color='black', linestyle='dashed', linewidth=1)
-     	ax.set_title(partition_title+"\ncentred on "+label_b)
-     	ax.set_xlabel("Configuration (CC)")
-     	ax.set_ylabel("Enhancement Factor (β)")
-     	fig.savefig(filename_stem+"_"+str(m1+1)+"C_sub"+str(sub_num)+"_EF_B.png")
-     	#
-     	fig = Figure()
-     	ax = fig.add_subplot()
-     	ax.bar(xDATAvalues,yDATAvalues,color='blue',label=label_a)
-     	ax.bar(xDATBvalues,yDATBvalues,color='green',label=label_b)
-     	if max(yDATAvalues)>=max(yDATBvalues):
-             if min(yDATAvalues)<=min(yDATBvalues):
-                 ax.axis([binom_df[0].iloc[0],binom_df[0].iloc[-1],min(yDATAvalues)-0.5,max(yDATAvalues)+0.5])
-             else:
-                 ax.axis([binom_df[0].iloc[0],binom_df[0].iloc[-1],min(yDATBvalues)-0.5,max(yDATAvalues)+0.5])
-     	else:
-             if min(yDATAvalues)<=min(yDATBvalues):
-                 ax.axis([binom_df[0].iloc[0],binom_df[0].iloc[-1],min(yDATAvalues)-0.5,max(yDATBvalues)+0.5])
-             else:
-                 ax.axis([binom_df[0].iloc[0],binom_df[0].iloc[-1],min(yDATBvalues)-0.5,max(yDATBvalues)+0.5])
-     	ax.axhline(y=3, color='black', linestyle='dashed', linewidth=1)
-     	ax.axhline(y=-3, color='black', linestyle='dashed', linewidth=1)
-     	ax.set_title(partition_title)
-     	ax.set_xlabel("Configuration (CC)")
-     	ax.set_ylabel("Enhancement Factor (β)")
-     	ax.legend()
-     	fig.savefig(filename_stem+"_"+str(m1+1)+"C_sub"+str(sub_num)+"_EF_AB.png")
+        partition_title, _group_a, _group_b = _pseudo_binary_label(m1 + 1)
+        label_a = "-".join(_group_a)
+        label_b = "-".join(_group_b)
+        xDATvalues = []
+        yDATvalues = []
+        xDATAvalues = []
+        yDATAvalues = []
+        xDATBvalues = []
+        yDATBvalues = []
+        for n1 in range(len(config_hist)):
+            xDATvalues.append(config_hist[n1][0])
+            yDATvalues.append(config_hist[n1][m1 + 1][20])
+            xDATAvalues.append(config_hist[n1][0])
+            yDATAvalues.append(config_hist[n1][m1 + 1][18])
+            xDATBvalues.append(config_hist[n1][0])
+            yDATBvalues.append(config_hist[n1][m1 + 1][19])
+        # print max(yDATvalues)
+        fig = Figure()
+        ax = fig.add_subplot()
+        ax.bar(xDATvalues, yDATvalues, color="red")
+        ax.axis(
+            [
+                binom_df[0].iloc[0],
+                binom_df[0].iloc[-1],
+                min(yDATvalues) - 0.5,
+                max(yDATvalues) + 0.5,
+            ]
+        )
+        ax.axhline(y=3, color="black", linestyle="dashed", linewidth=1)
+        ax.axhline(y=-3, color="black", linestyle="dashed", linewidth=1)
+        ax.set_title(partition_title)
+        ax.set_xlabel("Configuration (CC)")
+        ax.set_ylabel("Enhancement Factor (β)")
+        fig.savefig(filename_stem + "_" + str(m1 + 1) + "C_sub" + str(sub_num) + "_EF.png")
+        #
+        fig = Figure()
+        ax = fig.add_subplot()
+        ax.bar(xDATAvalues, yDATAvalues, color="blue")
+        ax.axis(
+            [
+                binom_df[0].iloc[0],
+                binom_df[0].iloc[-1],
+                min(yDATAvalues) - 0.5,
+                max(yDATAvalues) + 0.5,
+            ]
+        )
+        ax.axhline(y=3, color="black", linestyle="dashed", linewidth=1)
+        ax.axhline(y=-3, color="black", linestyle="dashed", linewidth=1)
+        ax.set_title(partition_title + "\ncentred on " + label_a)
+        ax.set_xlabel("Configuration (CC)")
+        ax.set_ylabel("Enhancement Factor (β)")
+        fig.savefig(filename_stem + "_" + str(m1 + 1) + "C_sub" + str(sub_num) + "_EF_A.png")
+        #
+        fig = Figure()
+        ax = fig.add_subplot()
+        ax.bar(xDATBvalues, yDATBvalues, color="green")
+        ax.axis(
+            [
+                binom_df[0].iloc[0],
+                binom_df[0].iloc[-1],
+                min(yDATBvalues) - 0.5,
+                max(yDATBvalues) + 0.5,
+            ]
+        )
+        ax.axhline(y=3, color="black", linestyle="dashed", linewidth=1)
+        ax.axhline(y=-3, color="black", linestyle="dashed", linewidth=1)
+        ax.set_title(partition_title + "\ncentred on " + label_b)
+        ax.set_xlabel("Configuration (CC)")
+        ax.set_ylabel("Enhancement Factor (β)")
+        fig.savefig(filename_stem + "_" + str(m1 + 1) + "C_sub" + str(sub_num) + "_EF_B.png")
+        #
+        fig = Figure()
+        ax = fig.add_subplot()
+        ax.bar(xDATAvalues, yDATAvalues, color="blue", label=label_a)
+        ax.bar(xDATBvalues, yDATBvalues, color="green", label=label_b)
+        if max(yDATAvalues) >= max(yDATBvalues):
+            if min(yDATAvalues) <= min(yDATBvalues):
+                ax.axis(
+                    [
+                        binom_df[0].iloc[0],
+                        binom_df[0].iloc[-1],
+                        min(yDATAvalues) - 0.5,
+                        max(yDATAvalues) + 0.5,
+                    ]
+                )
+            else:
+                ax.axis(
+                    [
+                        binom_df[0].iloc[0],
+                        binom_df[0].iloc[-1],
+                        min(yDATBvalues) - 0.5,
+                        max(yDATAvalues) + 0.5,
+                    ]
+                )
+        else:
+            if min(yDATAvalues) <= min(yDATBvalues):
+                ax.axis(
+                    [
+                        binom_df[0].iloc[0],
+                        binom_df[0].iloc[-1],
+                        min(yDATAvalues) - 0.5,
+                        max(yDATBvalues) + 0.5,
+                    ]
+                )
+            else:
+                ax.axis(
+                    [
+                        binom_df[0].iloc[0],
+                        binom_df[0].iloc[-1],
+                        min(yDATBvalues) - 0.5,
+                        max(yDATBvalues) + 0.5,
+                    ]
+                )
+        ax.axhline(y=3, color="black", linestyle="dashed", linewidth=1)
+        ax.axhline(y=-3, color="black", linestyle="dashed", linewidth=1)
+        ax.set_title(partition_title)
+        ax.set_xlabel("Configuration (CC)")
+        ax.set_ylabel("Enhancement Factor (β)")
+        ax.legend()
+        fig.savefig(filename_stem + "_" + str(m1 + 1) + "C_sub" + str(sub_num) + "_EF_AB.png")
 
     print("\nConfigurational Analysis Complete.\n")
 
@@ -922,7 +1019,7 @@ def run_batch(dict_dir, sublattice, rmc6f_paths, on_progress=None):
 def main(dict_dir=None, sublattice=None, rmc6f=None):
     """Interactive entry point: prompts for `dict_dir` if it wasn't supplied, then delegates
     to run(). `sublattice`/`rmc6f` behave as in run() - pass them to skip those prompts too."""
-    print('\n====================================================================\n')
+    print("\n====================================================================\n")
     print("\t\tConfigurational Analysis - v1.0 (2024)\n")
     print("\t   Developed by: Benjamin E. Jolly; Lewis R. Owen\n")
     print("\t\t    University of Sheffield, UK\n")
@@ -932,28 +1029,6 @@ def main(dict_dir=None, sublattice=None, rmc6f=None):
         dict_dir = input("Input Dictionaries Directory:\t")
 
     return run(dict_dir, sublattice=sublattice, rmc6f=rmc6f)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 if __name__ == "__main__":

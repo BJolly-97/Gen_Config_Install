@@ -18,7 +18,9 @@ class DictionaryTab(ttk.Frame):
         row.pack(fill="x", pady=4)
         ttk.Label(row, text=".cif file:").pack(side="left")
         self.cif_var = tk.StringVar()
-        ttk.Entry(row, textvariable=self.cif_var, width=60).pack(side="left", padx=6, fill="x", expand=True)
+        ttk.Entry(row, textvariable=self.cif_var, width=60).pack(
+            side="left", padx=6, fill="x", expand=True
+        )
         ttk.Button(row, text="Browse...", command=self._browse_cif).pack(side="left")
 
         group_frame = ttk.LabelFrame(self, text="Lattice-site equivalences (optional)")
@@ -32,7 +34,9 @@ class DictionaryTab(ttk.Frame):
         entry.pack(side="left", padx=6)
         entry.bind("<Return>", lambda e: self._add_group())
         ttk.Button(add_row, text="Add group", command=self._add_group).pack(side="left")
-        ttk.Button(add_row, text="Remove selected", command=self._remove_group).pack(side="left", padx=6)
+        ttk.Button(add_row, text="Remove selected", command=self._remove_group).pack(
+            side="left", padx=6
+        )
 
         self.group_listbox = tk.Listbox(group_frame, height=4)
         self.group_listbox.pack(fill="x", padx=4, pady=(0, 4))
@@ -40,17 +44,22 @@ class DictionaryTab(ttk.Frame):
         ttk.Label(
             self,
             text="Atom-type indices (0, 1, 2, ...) correspond to the order sites appear in the\n"
-                 ".cif file - the log below prints that list once you generate, so if you're\n"
-                 "unsure of the numbering, generate once with no groups, check the log, then\n"
-                 "add groups and re-generate.",
-            foreground="#666", justify="left",
+            ".cif file - the log below prints that list once you generate, so if you're\n"
+            "unsure of the numbering, generate once with no groups, check the log, then\n"
+            "add groups and re-generate.",
+            foreground="#666",
+            justify="left",
         ).pack(anchor="w", pady=(0, 8))
 
         action_row = ttk.Frame(self)
         action_row.pack(fill="x", pady=4)
-        self.generate_button = ttk.Button(action_row, text="Generate Dictionary", command=self._generate)
+        self.generate_button = ttk.Button(
+            action_row, text="Generate Dictionary", command=self._generate
+        )
         self.generate_button.pack(side="left")
-        ttk.Button(action_row, text="Clear fields", command=self._clear_all).pack(side="left", padx=6)
+        ttk.Button(action_row, text="Clear fields", command=self._clear_all).pack(
+            side="left", padx=6
+        )
         self.status_var = tk.StringVar(value="")
         ttk.Label(action_row, textvariable=self.status_var).pack(side="left", padx=10)
 
@@ -75,7 +84,7 @@ class DictionaryTab(ttk.Frame):
         if not text:
             return
         try:
-            [int(x) for x in text.split(',')]
+            [int(x) for x in text.split(",")]
         except ValueError:
             messagebox.showerror("Invalid group", "Enter comma-separated integers, e.g. 0,1")
             return

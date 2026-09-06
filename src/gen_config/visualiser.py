@@ -22,13 +22,15 @@ def _load_basis_and_config(dict_dir, sublattice):
 
     # Loop through files in the folder
     for stemname in os.listdir(filepath):
-        if stemname.endswith(".basis"+sub_num):
+        if stemname.endswith(".basis" + sub_num):
             basis_ext = stemname
-        if stemname.endswith(".cfgdict"+sub_num):
+        if stemname.endswith(".cfgdict" + sub_num):
             clapp_ext = stemname
 
     if basis_ext is None or clapp_ext is None:
-        raise FileNotFoundError(f"No '.basis{sub_num}'/'.cfgdict{sub_num}' files found in '{filepath}' for sub-lattice {sub_num}.")
+        raise FileNotFoundError(
+            f"No '.basis{sub_num}'/'.cfgdict{sub_num}' files found in '{filepath}' for sub-lattice {sub_num}."
+        )
 
     basis = open(os.path.join(filepath, basis_ext), "r")
     line_read = basis.readlines()
@@ -39,16 +41,16 @@ def _load_basis_and_config(dict_dir, sublattice):
     del lines[-1]
 
     basis_df = pd.DataFrame(lines)
-    basis_df = basis_df[0].str.split('\\s+', expand = True)
+    basis_df = basis_df[0].str.split("\\s+", expand=True)
     basis_df.drop([0, 4, 5], axis=1, inplace=True)
-    basis_df.rename(columns={1:'x', 2:'y', 3:'z',5:'Atom No.'}, inplace=True)
+    basis_df.rename(columns={1: "x", 2: "y", 3: "z", 5: "Atom No."}, inplace=True)
 
     config_dict = open(os.path.join(filepath, clapp_ext), "r")
     config_read = config_dict.readlines()
     config_dict.close()
 
     config_df = pd.DataFrame(config_read)
-    config_df = config_df[0].str.split('\\s+', expand = True)
+    config_df = config_df[0].str.split("\\s+", expand=True)
 
     return basis_df, config_df
 
@@ -70,7 +72,7 @@ def _plotting_df_for_label(basis_df, config_df, label):
     full_bin = input_bin[2:].zfill(len(basis_df))
     full_bin = list(full_bin)
     bin_df = pd.DataFrame(full_bin)
-    bin_df.rename(columns={0:'Bin'}, inplace=True)
+    bin_df.rename(columns={0: "Bin"}, inplace=True)
 
     return pd.concat([basis_df, bin_df], axis=1)
 
@@ -79,16 +81,28 @@ def _draw_configuration(ax, plotting_df, label):
     """Draws the occupied(red)/empty(black) nearest-neighbour scatter for one configuration
     onto an existing 3D Axes."""
     for i in range(len(plotting_df)):
-        if plotting_df['Bin'][i] == '1':
-            ax.scatter(float(plotting_df['x'].iloc[i]), float(plotting_df['y'].iloc[i]), float(plotting_df['z'].iloc[i]), color='r', s=500)
-        elif plotting_df['Bin'][i] == '0':
-            ax.scatter(float(plotting_df['x'].iloc[i]), float(plotting_df['y'].iloc[i]), float(plotting_df['z'].iloc[i]), color='black', s=500)
+        if plotting_df["Bin"][i] == "1":
+            ax.scatter(
+                float(plotting_df["x"].iloc[i]),
+                float(plotting_df["y"].iloc[i]),
+                float(plotting_df["z"].iloc[i]),
+                color="r",
+                s=500,
+            )
+        elif plotting_df["Bin"][i] == "0":
+            ax.scatter(
+                float(plotting_df["x"].iloc[i]),
+                float(plotting_df["y"].iloc[i]),
+                float(plotting_df["z"].iloc[i]),
+                color="black",
+                s=500,
+            )
 
-    ax.scatter(0,0,0, marker='X', color='black', s=150)
-    ax.set_xlabel('X')
-    ax.set_ylabel('Y')
-    ax.set_zlabel('Z')
-    ax.set_title("C"+label)
+    ax.scatter(0, 0, 0, marker="X", color="black", s=150)
+    ax.set_xlabel("X")
+    ax.set_ylabel("Y")
+    ax.set_zlabel("Z")
+    ax.set_title("C" + label)
 
 
 def build_figure(dict_dir, sublattice, label):
@@ -109,7 +123,7 @@ def build_figure(dict_dir, sublattice, label):
         return None
 
     fig = Figure()
-    ax = fig.add_subplot(projection='3d')
+    ax = fig.add_subplot(projection="3d")
     _draw_configuration(ax, plotting_df, label)
     return fig
 
@@ -126,7 +140,7 @@ def run(dict_dir, sublattice, config):
     """
     basis_df, config_df = _load_basis_and_config(dict_dir, sublattice)
 
-    input_config = config.split(',') if isinstance(config, str) else list(config)
+    input_config = config.split(",") if isinstance(config, str) else list(config)
 
     for label in input_config:
         plotting_df = _plotting_df_for_label(basis_df, config_df, label)
@@ -135,12 +149,12 @@ def run(dict_dir, sublattice, config):
             print(f"\nConfiguration label '{label}' not found for this sub-lattice - skipping.")
             continue
 
-        axes = [1,1,1]
+        axes = [1, 1, 1]
         data = np.ones(axes)
-        data = data*0.5
+        data = data * 0.5
 
         fig = plt.figure()
-        ax = fig.add_subplot(projection='3d')
+        ax = fig.add_subplot(projection="3d")
         _draw_configuration(ax, plotting_df, label)
 
         plt.show()
@@ -150,7 +164,7 @@ def main(dict_dir=None):
     """Interactive entry point: repeatedly prompts for a sub-lattice and configuration
     label(s) to plot, offering to continue after each round, exactly as before. Delegates
     the actual plotting of each round to run()."""
-    print('\n====================================================================\n')
+    print("\n====================================================================\n")
     print("\t\tConfigurational Analysis - v1.0 (2024)\n")
     print("\t\t Graphical Configuration Visualiser\n")
     print("\t   Developed by: Benjamin E. Jolly; Lewis R. Owen\n")
@@ -163,11 +177,13 @@ def main(dict_dir=None):
 
     sublattice_labels = None
     for stemname in os.listdir(filepath):
-        if stemname.endswith('.finsub'):
+        if stemname.endswith(".finsub"):
             sublattice_labels = stemname
 
     if sublattice_labels is None:
-        raise FileNotFoundError(f"No '.finsub' file found in '{filepath}'. Run 'dict' first to generate the dictionary files.")
+        raise FileNotFoundError(
+            f"No '.finsub' file found in '{filepath}'. Run 'dict' first to generate the dictionary files."
+        )
 
     sublab_file = open(os.path.join(filepath, sublattice_labels), "r")
     sublab_read = sublab_file.readlines()
@@ -175,27 +191,29 @@ def main(dict_dir=None):
 
     sublab = pd.DataFrame(sublab_read)
 
-    exit_cond=0
+    exit_cond = 0
 
     while exit_cond == 0:
         print("\nEnter desired sublattice for analysis (e.g. 0):\n")
         for i in range(len(sublab)):
-            print(sublab.loc[i,0])
+            print(sublab.loc[i, 0])
 
         sub_num = str(input())
 
-        input_config_list = input("\nInput desired configuration(s) (NB: For multiple configuration plots, separate values using commas.):\t")
+        input_config_list = input(
+            "\nInput desired configuration(s) (NB: For multiple configuration plots, separate values using commas.):\t"
+        )
 
         run(dict_dir, sub_num, input_config_list)
 
-        A = input('\nContinue with visualisation for selected sublattice? (Y/N)\n').strip().upper()
-        if A == 'Y':
+        A = input("\nContinue with visualisation for selected sublattice? (Y/N)\n").strip().upper()
+        if A == "Y":
             pass
-        elif A == 'N':
-            exit_cond+=1
+        elif A == "N":
+            exit_cond += 1
         else:
-            print('\nInvalid Input.\n')
-            exit_cond+=1
+            print("\nInvalid Input.\n")
+            exit_cond += 1
 
     print("\n--------------End---------------\n\n")
 

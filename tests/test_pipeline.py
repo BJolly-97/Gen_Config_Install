@@ -44,7 +44,9 @@ def test_dict_generates_expected_files(workdir, monkeypatch):
         assert (workdir / f"FeNi{suffix}").exists(), f"dict did not produce FeNi{suffix}"
 
     finsub = (workdir / "FeNi.finsub").read_text()
-    assert "Fe/Ni" in finsub, "the two co-sited species should have been merged into one Fe/Ni sub-lattice"
+    assert "Fe/Ni" in finsub, (
+        "the two co-sited species should have been merged into one Fe/Ni sub-lattice"
+    )
 
 
 def test_config_runs_against_dict_output(workdir, monkeypatch):
@@ -55,7 +57,9 @@ def test_config_runs_against_dict_output(workdir, monkeypatch):
     histograms.main()
 
     for suffix in ["_sub0.clapp", "_sub0_EF.clapp", "_mb.rmc6f"]:
-        assert (workdir / f"FeNi_config{suffix}").exists(), f"config did not produce FeNi_config{suffix}"
+        assert (workdir / f"FeNi_config{suffix}").exists(), (
+            f"config did not produce FeNi_config{suffix}"
+        )
 
     ef_lines = (workdir / "FeNi_config_sub0_EF.clapp").read_text().splitlines()
     assert any(line.strip() for line in ef_lines[5:]), "enhancement factor file has no data rows"
@@ -69,7 +73,9 @@ def _strip_site_label_column(src: Path, dst: Path):
     for line in lines:
         if in_atoms and line.split():
             p = line.split()
-            out.append(" ".join(p[:2] + p[3:]))  # id sym [label] x y z ref i j k -> id sym x y z ref i j k
+            out.append(
+                " ".join(p[:2] + p[3:])
+            )  # id sym [label] x y z ref i j k -> id sym x y z ref i j k
         else:
             out.append(line)
         if line.strip() == "Atoms:":
@@ -110,7 +116,9 @@ def test_config_handles_9_and_10_column_rmc6f(workdir, monkeypatch):
     ef_9col = (workdir / "FeNi_9col_sub0_EF.clapp").read_text()
 
     for suffix in ["_sub0.clapp", "_sub0_EF.clapp", "_mb.rmc6f"]:
-        assert (workdir / f"FeNi_9col{suffix}").exists(), f"config did not produce FeNi_9col{suffix}"
+        assert (workdir / f"FeNi_9col{suffix}").exists(), (
+            f"config did not produce FeNi_9col{suffix}"
+        )
     # Only difference should be the echoed input filename (EF file, line 3).
     assert ef_9col.replace("FeNi_9col", "FeNi_config") == ef_10col
 

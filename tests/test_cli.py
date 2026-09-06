@@ -44,17 +44,16 @@ def test_dictionary_run_matches_interactive_main(workdir, monkeypatch):
     dictionary.main()
 
     for suffix in [".cellpos", ".finsub", ".basis0", ".sym0", ".cfgdict0", ".binom0"]:
-        assert filecmp.cmp(scripted_dir / f"FeNi{suffix}", interactive_dir / f"FeNi{suffix}", shallow=False), \
-            f"scripted vs. interactive output differs for FeNi{suffix}"
+        assert filecmp.cmp(
+            scripted_dir / f"FeNi{suffix}", interactive_dir / f"FeNi{suffix}", shallow=False
+        ), f"scripted vs. interactive output differs for FeNi{suffix}"
 
 
 def test_dictionary_run_rejects_equivalence_for_single_species(tmp_path, monkeypatch):
     """A structure with only one atom type has nothing to merge - passing an equivalence
     group for it should fail loudly, not silently ignore the request."""
     cif = tmp_path / "single.cif"
-    cif.write_text(
-        (FIXTURES / "FeNi.cif").read_text().replace("Ni1 Ni 0.0 0.0 0.0\n", "")
-    )
+    cif.write_text((FIXTURES / "FeNi.cif").read_text().replace("Ni1 Ni 0.0 0.0 0.0\n", ""))
     monkeypatch.chdir(tmp_path)
 
     with pytest.raises(ValueError):
@@ -62,11 +61,16 @@ def test_dictionary_run_rejects_equivalence_for_single_species(tmp_path, monkeyp
 
 
 def test_histograms_run_batch_continues_past_a_bad_file(workdir, monkeypatch):
-    monkeypatch.setattr("builtins.input", lambda *a, **k: (_ for _ in ()).throw(AssertionError("run_batch must not prompt")))
+    monkeypatch.setattr(
+        "builtins.input",
+        lambda *a, **k: (_ for _ in ()).throw(AssertionError("run_batch must not prompt")),
+    )
 
     dictionary.run("FeNi.cif", equivalence=[[0, 1]])
 
-    succeeded, failed = histograms.run_batch(".", "0", ["run1.rmc6f", "run2.rmc6f", "broken.rmc6f", "run3.rmc6f"])
+    succeeded, failed = histograms.run_batch(
+        ".", "0", ["run1.rmc6f", "run2.rmc6f", "broken.rmc6f", "run3.rmc6f"]
+    )
 
     assert len(succeeded) == 3
     assert len(failed) == 1
@@ -74,7 +78,10 @@ def test_histograms_run_batch_continues_past_a_bad_file(workdir, monkeypatch):
 
 
 def test_cli_scripted_dict_and_batch_analyse(workdir, monkeypatch):
-    monkeypatch.setattr("builtins.input", lambda *a, **k: (_ for _ in ()).throw(AssertionError("scripted CLI usage must not prompt")))
+    monkeypatch.setattr(
+        "builtins.input",
+        lambda *a, **k: (_ for _ in ()).throw(AssertionError("scripted CLI usage must not prompt")),
+    )
 
     cli.main(["dict", "--cif", "FeNi.cif", "--equivalence", "0,1"])
 
@@ -89,16 +96,24 @@ def test_cli_scripted_dict_and_batch_analyse(workdir, monkeypatch):
 
 def test_cli_batch_analyse_all_succeed_exits_zero(workdir, monkeypatch):
     (workdir / "broken.rmc6f").unlink()
-    monkeypatch.setattr("builtins.input", lambda *a, **k: (_ for _ in ()).throw(AssertionError("scripted CLI usage must not prompt")))
+    monkeypatch.setattr(
+        "builtins.input",
+        lambda *a, **k: (_ for _ in ()).throw(AssertionError("scripted CLI usage must not prompt")),
+    )
 
     cli.main(["dict", "--cif", "FeNi.cif", "--equivalence", "0,1"])
-    cli.main(["config", "--dict-dir", ".", "--sublattice", "0", "--rmc6f-glob", "*.rmc6f"])  # should not raise/exit
+    cli.main(
+        ["config", "--dict-dir", ".", "--sublattice", "0", "--rmc6f-glob", "*.rmc6f"]
+    )  # should not raise/exit
 
 
 def test_cli_batch_glob_excludes_own_mb_output(workdir, monkeypatch):
     """Re-running the same glob shouldn't reprocess this tool's own _mb.rmc6f output."""
     (workdir / "broken.rmc6f").unlink()
-    monkeypatch.setattr("builtins.input", lambda *a, **k: (_ for _ in ()).throw(AssertionError("scripted CLI usage must not prompt")))
+    monkeypatch.setattr(
+        "builtins.input",
+        lambda *a, **k: (_ for _ in ()).throw(AssertionError("scripted CLI usage must not prompt")),
+    )
 
     cli.main(["dict", "--cif", "FeNi.cif", "--equivalence", "0,1"])
     cli.main(["config", "--dict-dir", ".", "--sublattice", "0", "--rmc6f-glob", "*.rmc6f"])

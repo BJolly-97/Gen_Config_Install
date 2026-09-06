@@ -21,14 +21,18 @@ class VisualiserTab(ttk.Frame):
         row.pack(fill="x", pady=4)
         ttk.Label(row, text="Dictionary directory:").pack(side="left")
         self.dict_dir_var = tk.StringVar()
-        ttk.Entry(row, textvariable=self.dict_dir_var, width=45).pack(side="left", padx=6, fill="x", expand=True)
+        ttk.Entry(row, textvariable=self.dict_dir_var, width=45).pack(
+            side="left", padx=6, fill="x", expand=True
+        )
         ttk.Button(row, text="Browse...", command=self._browse_dict_dir).pack(side="left")
 
         row2 = ttk.Frame(self)
         row2.pack(fill="x", pady=4)
         ttk.Label(row2, text="Sub-lattice:").pack(side="left")
         self.sublattice_var = tk.StringVar()
-        self.sublattice_combo = ttk.Combobox(row2, textvariable=self.sublattice_var, state="readonly", width=30)
+        self.sublattice_combo = ttk.Combobox(
+            row2, textvariable=self.sublattice_var, state="readonly", width=30
+        )
         self.sublattice_combo.pack(side="left", padx=6)
         self.sublattice_combo.bind("<<ComboboxSelected>>", lambda e: self._refresh_labels())
         ttk.Button(row2, text="Refresh", command=self._refresh_sublattices).pack(side="left")
@@ -38,14 +42,20 @@ class VisualiserTab(ttk.Frame):
 
         left = ttk.LabelFrame(body, text="Configurations")
         left.pack(side="left", fill="y", padx=(0, 8))
-        self.labels_listbox = tk.Listbox(left, selectmode="extended", width=14, height=24, exportselection=False)
+        self.labels_listbox = tk.Listbox(
+            left, selectmode="extended", width=14, height=24, exportselection=False
+        )
         self.labels_listbox.pack(fill="y", padx=4, pady=4)
 
         btn_col = ttk.Frame(left)
         btn_col.pack(fill="x", padx=4, pady=(0, 4))
         ttk.Button(btn_col, text="Plot selected", command=self._plot_selected).pack(fill="x")
-        ttk.Button(btn_col, text="Close all tabs", command=self._close_all).pack(fill="x", pady=(4, 0))
-        ttk.Button(btn_col, text="Clear fields", command=self._clear_fields).pack(fill="x", pady=(4, 0))
+        ttk.Button(btn_col, text="Close all tabs", command=self._close_all).pack(
+            fill="x", pady=(4, 0)
+        )
+        ttk.Button(btn_col, text="Clear fields", command=self._clear_fields).pack(
+            fill="x", pady=(4, 0)
+        )
 
         right = ttk.Frame(body)
         right.pack(side="left", fill="both", expand=True)
@@ -99,10 +109,15 @@ class VisualiserTab(ttk.Frame):
         selected = [self.labels_listbox.get(i) for i in self.labels_listbox.curselection()]
 
         if not dict_dir or sub_num is None:
-            messagebox.showerror("Missing input", "Choose a dictionary directory and sub-lattice first.")
+            messagebox.showerror(
+                "Missing input", "Choose a dictionary directory and sub-lattice first."
+            )
             return
         if not selected:
-            messagebox.showerror("No configurations selected", "Select one or more configurations to plot (Ctrl/Shift-click for several).")
+            messagebox.showerror(
+                "No configurations selected",
+                "Select one or more configurations to plot (Ctrl/Shift-click for several).",
+            )
             return
 
         for label in selected:
@@ -112,7 +127,9 @@ class VisualiserTab(ttk.Frame):
                 messagebox.showerror("Plot failed", f"C{label}: {type(exc).__name__}: {exc}")
                 continue
             if fig is None:
-                messagebox.showwarning("Not found", f"Configuration label '{label}' not found for this sub-lattice.")
+                messagebox.showwarning(
+                    "Not found", f"Configuration label '{label}' not found for this sub-lattice."
+                )
                 continue
             self._add_tab(fig, label)
 

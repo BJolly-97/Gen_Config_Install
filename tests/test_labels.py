@@ -34,6 +34,7 @@ def test_plots_are_titled_and_labelled(workdir, monkeypatch):
     (they're only ever fig.savefig()'d), so this intercepts Figure.savefig() to capture
     each figure's real Axes state at the moment it would have been written to disk."""
     import matplotlib
+
     matplotlib.use("Agg")
     from matplotlib.figure import Figure
 
@@ -91,14 +92,19 @@ def test_pseudo_binary_label_matches_examples():
         group_b = [species_names[i] for i in range(no_types_new) if red[i] == 1]
         if min(len(group_a), len(group_b)) == 1:
             return group_a[0] if len(group_a) == 1 else group_b[0]
-        return '-'.join(group_a) + ' : ' + '-'.join(group_b)
+        return "-".join(group_a) + " : " + "-".join(group_b)
 
     quaternary = ["Ni", "Co", "Cr", "Fe"]
     titles = [label(n1, 4, quaternary) for n1 in range(1, 8)]
     assert "Ni-Cr : Co-Fe" in titles
     assert "Ni-Co : Cr-Fe" in titles
     assert "Ni-Fe : Co-Cr" in titles
-    assert set(titles) & {"Ni", "Co", "Cr", "Fe"} == {"Ni", "Co", "Cr", "Fe"}  # each single-species case also appears
+    assert set(titles) & {"Ni", "Co", "Cr", "Fe"} == {
+        "Ni",
+        "Co",
+        "Cr",
+        "Fe",
+    }  # each single-species case also appears
 
     ternary = ["Ni", "Co", "Cr"]
     ternary_titles = {label(n1, 3, ternary) for n1 in range(1, 4)}
