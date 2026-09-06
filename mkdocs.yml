@@ -33,6 +33,7 @@ nav:
   - Output files: output-files.md
   - The method: method.md
   - Development: development.md
+  - Changelog: changelog.md
 
 markdown_extensions:
   - admonition

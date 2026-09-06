@@ -27,7 +27,9 @@ test matrix (Linux / macOS / Windows × Python 3.9 / 3.11 / 3.13) and a package 
 | `tests/` | end-to-end regression tests + fixtures |
 | `examples/` | runnable sample datasets |
 | `docs/` | this documentation (MkDocs) |
+| `docker/` | `Dockerfile` and its ignore file for the headless image |
 | `legacy/` | frozen pre-package entry points, excluded from lint/format |
+| `.github/` | CI/release workflows, Dependabot, and the `CONTRIBUTING` / `CITATION` / `RELEASING` docs |
 
 ## Notes
 

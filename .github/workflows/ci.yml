@@ -97,7 +97,7 @@ jobs:
         with:
           fetch-depth: 0  # setuptools-scm
       - name: Build image
-        run: docker build -t clapp-jolly:ci .
+        run: docker build -f docker/Dockerfile -t clapp-jolly:ci .
       - name: Smoke test
         run: |
           docker run --rm clapp-jolly:ci --help

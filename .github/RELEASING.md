@@ -25,7 +25,7 @@ a publish needs a manual click.
 
 ## Cutting a release
 
-1. Make sure `main` is green and `CHANGELOG.md` has the notes under `[Unreleased]`.
+1. Make sure `main` is green and `docs/changelog.md` has the notes under `[Unreleased]`.
 2. Move the `[Unreleased]` items under a new `## [1.2.3] - YYYY-MM-DD` heading; commit.
 3. Tag and push:
    ```bash
