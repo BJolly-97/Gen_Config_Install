@@ -88,3 +88,25 @@ jobs:
           python-version: "3.13"
       - run: pip install -e ".[docs]"
       - run: mkdocs build --strict
+
+  docker:
+    needs: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0  # setuptools-scm
+      - name: Build image
+        run: docker build -t clapp-jolly:ci .
+      - name: Smoke test
+        run: |
+          docker run --rm clapp-jolly:ci --help
+          docker run --rm --entrypoint python clapp-jolly:ci -c "import gen_config; print(gen_config.__version__)"
+      - name: Run the bundled example in the container
+        run: |
+          mkdir -p run
+          cp examples/FeNi/FeNi.cif examples/FeNi/FeNi_solid_solution.rmc6f run/
+          chmod 777 run
+          docker run --rm -v "$PWD/run:/data" clapp-jolly:ci dict --cif FeNi.cif --equivalence 0,1
+          docker run --rm -v "$PWD/run:/data" clapp-jolly:ci config --dict-dir . --sublattice 0 --rmc6f FeNi_solid_solution.rmc6f
+          test -f run/FeNi_solid_solution_sub0_EF.clapp
