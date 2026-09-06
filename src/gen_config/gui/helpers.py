@@ -15,21 +15,23 @@ def read_finsub(dict_dir):
     [('0', 'Fe/Ni')]), or raises FileNotFoundError if there isn't one yet."""
     finsub_name = None
     for stemname in os.listdir(dict_dir):
-        if stemname.endswith('.finsub'):
+        if stemname.endswith(".finsub"):
             finsub_name = stemname
 
     if finsub_name is None:
-        raise FileNotFoundError(f"No '.finsub' file found in '{dict_dir}'. Run Dictionary generation first.")
+        raise FileNotFoundError(
+            f"No '.finsub' file found in '{dict_dir}'. Run Dictionary generation first."
+        )
 
     entries = []
-    with open(os.path.join(dict_dir, finsub_name), "r") as f:
+    with open(os.path.join(dict_dir, finsub_name)) as f:
         for line in f:
             line = line.strip()
             if not line:
                 continue
             # Format: "Sub-lattice 0:\tFe/Ni"
-            head, _, label = line.partition('\t')
-            index = head.replace('Sub-lattice', '').replace(':', '').strip()
+            head, _, label = line.partition("\t")
+            index = head.replace("Sub-lattice", "").replace(":", "").strip()
             entries.append((index, label))
     return entries
 
@@ -40,7 +42,7 @@ def read_config_labels(dict_dir, sublattice):
     sub_num = str(sublattice)
     clapp_ext = None
     for stemname in os.listdir(dict_dir):
-        if stemname.endswith(".cfgdict"+sub_num):
+        if stemname.endswith(".cfgdict" + sub_num):
             clapp_ext = stemname
 
     if clapp_ext is None:
@@ -48,7 +50,7 @@ def read_config_labels(dict_dir, sublattice):
 
     labels = []
     seen = set()
-    with open(os.path.join(dict_dir, clapp_ext), "r") as f:
+    with open(os.path.join(dict_dir, clapp_ext)) as f:
         for line in f:
             parts = line.split()
             if len(parts) < 2:
@@ -72,6 +74,7 @@ class _QueueWriter:
     stdout from a background worker thread into the GUI's log widget (Tkinter widgets can
     only safely be touched from the main thread, so the worker never writes to one
     directly)."""
+
     def __init__(self, q):
         self._q = q
 
@@ -98,6 +101,7 @@ class BackgroundJob:
             return histograms.run_batch(dict_dir, sub, paths, on_progress=job.progress_callback)
         job.start(work, on_log=log_widget_append, on_progress=update_progress_bar, on_done=finished)
     """
+
     def __init__(self, tk_widget):
         self._widget = tk_widget
         self._queue = queue.Queue()
@@ -109,6 +113,7 @@ class BackgroundJob:
 
     def start(self, fn, on_log=None, on_progress=None, on_done=None):
         """Runs the zero-argument callable `fn` in a background thread."""
+
         def worker():
             writer = _QueueWriter(self._queue)
             old_stdout = sys.stdout

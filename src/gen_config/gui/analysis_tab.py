@@ -1,9 +1,10 @@
 import glob
 import os
 import tkinter as tk
-from tkinter import ttk, filedialog, messagebox
+from tkinter import filedialog, messagebox, ttk
 
 from gen_config import histograms
+
 from .helpers import BackgroundJob, read_finsub
 
 
@@ -22,14 +23,18 @@ class AnalysisTab(ttk.Frame):
         row.pack(fill="x", pady=4)
         ttk.Label(row, text="Dictionary directory:").pack(side="left")
         self.dict_dir_var = tk.StringVar()
-        ttk.Entry(row, textvariable=self.dict_dir_var, width=50).pack(side="left", padx=6, fill="x", expand=True)
+        ttk.Entry(row, textvariable=self.dict_dir_var, width=50).pack(
+            side="left", padx=6, fill="x", expand=True
+        )
         ttk.Button(row, text="Browse...", command=self._browse_dict_dir).pack(side="left")
 
         row2 = ttk.Frame(self)
         row2.pack(fill="x", pady=4)
         ttk.Label(row2, text="Sub-lattice:").pack(side="left")
         self.sublattice_var = tk.StringVar()
-        self.sublattice_combo = ttk.Combobox(row2, textvariable=self.sublattice_var, state="readonly", width=40)
+        self.sublattice_combo = ttk.Combobox(
+            row2, textvariable=self.sublattice_var, state="readonly", width=40
+        )
         self.sublattice_combo.pack(side="left", padx=6)
         ttk.Button(row2, text="Refresh", command=self._refresh_sublattices).pack(side="left")
 
@@ -38,14 +43,20 @@ class AnalysisTab(ttk.Frame):
 
         file_btn_row = ttk.Frame(files_frame)
         file_btn_row.pack(fill="x", padx=4, pady=4)
-        ttk.Button(file_btn_row, text="Add file(s)...", command=self._browse_rmc6f_files).pack(side="left")
+        ttk.Button(file_btn_row, text="Add file(s)...", command=self._browse_rmc6f_files).pack(
+            side="left"
+        )
         ttk.Label(file_btn_row, text="   or glob pattern:").pack(side="left")
         self.glob_var = tk.StringVar()
         glob_entry = ttk.Entry(file_btn_row, textvariable=self.glob_var, width=30)
         glob_entry.pack(side="left", padx=4)
         glob_entry.bind("<Return>", lambda e: self._add_glob_matches())
-        ttk.Button(file_btn_row, text="Add matches", command=self._add_glob_matches).pack(side="left")
-        ttk.Button(file_btn_row, text="Clear list", command=self._clear_files).pack(side="left", padx=10)
+        ttk.Button(file_btn_row, text="Add matches", command=self._add_glob_matches).pack(
+            side="left"
+        )
+        ttk.Button(file_btn_row, text="Clear list", command=self._clear_files).pack(
+            side="left", padx=10
+        )
 
         self.files_listbox = tk.Listbox(files_frame, height=6, selectmode="extended")
         self.files_listbox.pack(fill="both", expand=True, padx=4, pady=(0, 4))
@@ -54,7 +65,9 @@ class AnalysisTab(ttk.Frame):
         action_row.pack(fill="x", pady=4)
         self.run_button = ttk.Button(action_row, text="Run Analysis", command=self._run)
         self.run_button.pack(side="left")
-        ttk.Button(action_row, text="Clear all fields", command=self._clear_all).pack(side="left", padx=6)
+        ttk.Button(action_row, text="Clear all fields", command=self._clear_all).pack(
+            side="left", padx=6
+        )
         self.progress = ttk.Progressbar(action_row, length=250, mode="determinate")
         self.progress.pack(side="left", padx=10)
         self.status_var = tk.StringVar(value="")
@@ -154,7 +167,9 @@ class AnalysisTab(ttk.Frame):
         paths = list(self.files_listbox.get(0, "end"))
 
         if not dict_dir or sub_num is None:
-            messagebox.showerror("Missing input", "Choose a dictionary directory and sub-lattice first.")
+            messagebox.showerror(
+                "Missing input", "Choose a dictionary directory and sub-lattice first."
+            )
             return
         if not paths:
             messagebox.showerror("No files", "Add at least one .rmc6f file to analyse.")
@@ -168,7 +183,9 @@ class AnalysisTab(ttk.Frame):
         self.log_text.configure(state="disabled")
 
         def work():
-            return histograms.run_batch(dict_dir, sub_num, paths, on_progress=self._job.progress_callback)
+            return histograms.run_batch(
+                dict_dir, sub_num, paths, on_progress=self._job.progress_callback
+            )
 
         def done(result, error):
             self.run_button.configure(state="normal")

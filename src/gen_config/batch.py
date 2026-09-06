@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 High-throughput batch entry point.
 
@@ -15,15 +14,15 @@ from gen_config import dictionary, histograms
 def ask_yes_no(prompt):
     """Prompts for a Y/N answer; returns True/False, or None for anything else."""
     answer = input(prompt).strip().upper()
-    if answer == 'Y':
+    if answer == "Y":
         return True
-    if answer == 'N':
+    if answer == "N":
         return False
     return None
 
 
 def main():
-    print('\n====================================================================\n')
+    print("\n====================================================================\n")
     print("\t\tConfigurational Analysis - v1.0 (2024)\n")
     print("\t   Developed by: Benjamin E. Jolly; Lewis R. Owen\n")
     print("\t\t    University of Sheffield, UK\n")
@@ -37,7 +36,7 @@ def main():
         if gen_dict:
             dictionary.main()
 
-        run_hist = ask_yes_no('\nCalculate Enhancement Factors and generate Histograms? (Y/N):\t')
+        run_hist = ask_yes_no("\nCalculate Enhancement Factors and generate Histograms? (Y/N):\t")
 
         if run_hist is None:
             print("\nInvalid input.")

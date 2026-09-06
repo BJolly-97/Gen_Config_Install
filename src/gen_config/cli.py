@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Single entry point for Gen_Config: `gen-config`.
 
@@ -22,11 +21,15 @@ from gen_config import dictionary, histograms, visualiser
 def _run_repl():
     """The interactive command menu - equivalent to the old .bat/.sh launchers."""
     while True:
-        command = input(
-            "> Enter command (i.e. dict (Configurational Dictionaries), "
-            "config (Configurational Analysis), vis (Configuration Visualiser), "
-            "gui (Desktop GUI) or exit): "
-        ).strip().lower()
+        command = (
+            input(
+                "> Enter command (i.e. dict (Configurational Dictionaries), "
+                "config (Configurational Analysis), vis (Configuration Visualiser), "
+                "gui (Desktop GUI) or exit): "
+            )
+            .strip()
+            .lower()
+        )
 
         if command == "dict":
             dictionary.main()
@@ -35,7 +38,10 @@ def _run_repl():
         elif command == "vis":
             visualiser.main()
         elif command == "gui":
-            from gen_config.gui.app import main as gui_main  # lazy: don't force a Tkinter/display dependency on plain CLI usage
+            from gen_config.gui.app import (
+                main as gui_main,
+            )  # lazy: don't force a Tkinter/display dependency on plain CLI usage
+
             gui_main()
         elif command == "exit":
             break
@@ -47,7 +53,7 @@ def _parse_equivalence(groups):
     """Turns repeated --equivalence "0,1" flags into [[0, 1], ...] for dictionary.run()/main()."""
     if groups is None:
         return None
-    return [group.split(',') for group in groups]
+    return [group.split(",") for group in groups]
 
 
 def _resolve_rmc6f_paths(rmc6f, rmc6f_glob):
@@ -60,7 +66,9 @@ def _resolve_rmc6f_paths(rmc6f, rmc6f_glob):
         skipped = [p for p in matched if p.endswith("_mb.rmc6f")]
         matched = [p for p in matched if not p.endswith("_mb.rmc6f")]
         if skipped:
-            print(f"Note: --rmc6f-glob matched {len(skipped)} of this tool's own '_mb.rmc6f' output file(s) - skipping those.")
+            print(
+                f"Note: --rmc6f-glob matched {len(skipped)} of this tool's own '_mb.rmc6f' output file(s) - skipping those."
+            )
         if not matched:
             print(f"Warning: --rmc6f-glob '{rmc6f_glob}' matched no (non-output) files.")
         paths.extend(matched)
@@ -71,31 +79,55 @@ def build_parser():
     parser = argparse.ArgumentParser(
         prog="gen-config",
         description="Clapp-style configurational analysis of RMCProfile large-box models. "
-                     "Run with no arguments for the interactive menu.",
+        "Run with no arguments for the interactive menu.",
     )
     sub = parser.add_subparsers(dest="command")
 
-    p_dict = sub.add_parser("dict", help="Generate configurational dictionary files from a .cif structure.")
+    p_dict = sub.add_parser(
+        "dict", help="Generate configurational dictionary files from a .cif structure."
+    )
     p_dict.add_argument("--cif", help="Path to the .cif file. Omit to be prompted.")
     p_dict.add_argument(
-        "--equivalence", action="append", metavar="I,J,...",
+        "--equivalence",
+        action="append",
+        metavar="I,J,...",
         help="Merge these sub-lattice indices into one combined sub-lattice (e.g. --equivalence 0,1). "
-             "Repeat for multiple separate merge groups. Omit to be prompted interactively.",
+        "Repeat for multiple separate merge groups. Omit to be prompted interactively.",
     )
-    p_dict.add_argument("--no-equivalence", action="store_true", help="Explicitly skip equivalencing without prompting.")
+    p_dict.add_argument(
+        "--no-equivalence",
+        action="store_true",
+        help="Explicitly skip equivalencing without prompting.",
+    )
 
-    p_analyse = sub.add_parser("config", aliases=["analyse"], help="Run enhancement-factor analysis for one or many .rmc6f configurations.")
+    p_analyse = sub.add_parser(
+        "config",
+        aliases=["analyse"],
+        help="Run enhancement-factor analysis for one or many .rmc6f configurations.",
+    )
     p_analyse.add_argument("--dict-dir", help="Directory containing the dictionary files.")
-    p_analyse.add_argument("--sublattice", help="Sub-lattice number to analyse (as printed in .finsub).")
-    p_analyse.add_argument("--rmc6f", nargs="+", metavar="PATH", help="One or more .rmc6f files to analyse.")
-    p_analyse.add_argument("--rmc6f-glob", metavar="PATTERN", help='Glob pattern matching many .rmc6f files, e.g. "configs/*.rmc6f".')
+    p_analyse.add_argument(
+        "--sublattice", help="Sub-lattice number to analyse (as printed in .finsub)."
+    )
+    p_analyse.add_argument(
+        "--rmc6f", nargs="+", metavar="PATH", help="One or more .rmc6f files to analyse."
+    )
+    p_analyse.add_argument(
+        "--rmc6f-glob",
+        metavar="PATTERN",
+        help='Glob pattern matching many .rmc6f files, e.g. "configs/*.rmc6f".',
+    )
 
     p_vis = sub.add_parser("vis", help="Plot Clapp configurations for a sub-lattice.")
     p_vis.add_argument("--dict-dir", help="Directory containing the dictionary files.")
     p_vis.add_argument("--sublattice", help="Sub-lattice number to visualise.")
-    p_vis.add_argument("--config", help='Configuration label(s) to plot, comma-separated, e.g. "0,12,34".')
+    p_vis.add_argument(
+        "--config", help='Configuration label(s) to plot, comma-separated, e.g. "0,12,34".'
+    )
 
-    sub.add_parser("gui", help="Launch the desktop GUI (Dictionary/Analysis/Visualiser as one window).")
+    sub.add_parser(
+        "gui", help="Launch the desktop GUI (Dictionary/Analysis/Visualiser as one window)."
+    )
 
     return parser
 
@@ -135,7 +167,10 @@ def main(argv=None):
             visualiser.main(dict_dir=args.dict_dir)
 
     elif args.command == "gui":
-        from gen_config.gui.app import main as gui_main  # lazy: don't force a Tkinter/display dependency on plain CLI usage
+        from gen_config.gui.app import (
+            main as gui_main,
+        )  # lazy: don't force a Tkinter/display dependency on plain CLI usage
+
         gui_main()
 
 
