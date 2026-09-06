@@ -45,7 +45,14 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=7.0"]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "ruff>=0.16",
+    "pre-commit>=3.5",
+    "build>=1.0",
+    "twine>=5.0",
+]
 
 [project.urls]
 # TODO: point these at the public repository once it is published.
@@ -58,3 +65,24 @@ gen-config = "gen_config.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.ruff]
+target-version = "py39"
+line-length = 100
+extend-exclude = ["legacy"]
+
+[tool.ruff.lint]
+# Close to ruff's default (E4/E7/E9, F) plus import sorting, pyupgrade and pycodestyle
+# warnings. Deliberately conservative for now: the numerical core (histograms.py,
+# dictionary.py) predates the package and a stricter ruleset would demand risky edits
+# there. Tighten in a follow-up.
+select = ["E4", "E7", "E9", "F", "W", "I", "UP"]
+ignore = [
+    # Several "unused" locals in dictionary.py are load-bearing: `lines.index(...)` calls
+    # kept for their ValueError side-effect on malformed .cif input, plus some debug
+    # leftovers. Removing them is a separate, carefully-reviewed change.
+    "F841",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
