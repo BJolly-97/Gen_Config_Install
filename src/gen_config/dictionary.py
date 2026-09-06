@@ -1009,17 +1009,17 @@ def run(cif, equivalence=None):
                     )
 
             for k in range(len(NN_sym_dump)):
-                for l in range(len(NN_v[number])):
+                for vi in range(len(NN_v[number])):
                     if (
-                        (round(NN_sym_dump["x"].iloc[k], 6) == round(NN_v[number][0].iloc[l], 6))
+                        (round(NN_sym_dump["x"].iloc[k], 6) == round(NN_v[number][0].iloc[vi], 6))
                         and (
-                            round(NN_sym_dump["y"].iloc[k], 6) == round(NN_v[number][1].iloc[l], 6)
+                            round(NN_sym_dump["y"].iloc[k], 6) == round(NN_v[number][1].iloc[vi], 6)
                         )
                         and (
-                            round(NN_sym_dump["z"].iloc[k], 6) == round(NN_v[number][2].iloc[l], 6)
+                            round(NN_sym_dump["z"].iloc[k], 6) == round(NN_v[number][2].iloc[vi], 6)
                         )
                     ):
-                        NN_sym_dump.at[k, "Atom No."] = NN_v[number].loc[l, "Atom No."]
+                        NN_sym_dump.at[k, "Atom No."] = NN_v[number].loc[vi, "Atom No."]
 
             # print('____________________________________')
             # print(NN_sym_dump)
