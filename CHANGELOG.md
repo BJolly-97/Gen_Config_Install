@@ -20,10 +20,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   with coverage on Linux/macOS/Windows × Python 3.9/3.11/3.13, and a package
   build + `twine check`.
 - `pre-commit` config, Dependabot, and `CONTRIBUTING.md`.
+- MkDocs (Material) documentation site under `docs/`, built with `--strict` in CI and
+  deployable to GitHub Pages via `.github/workflows/docs.yml`.
+- `examples/FeNi/` — a runnable synthetic dataset with a walk-through.
 
 ### Changed
 - Renamed the distribution to `clapp-jolly` (the import package stays `gen_config`
   and the command stays `gen-config`).
+- Rewrote `README.md` as a concise landing page (badges, example plot, quickstart);
+  the full command and output-file reference moved to the docs site.
 - Moved the pre-package compatibility wrappers (`exe/`, `Batching_Scripts/`) into
   `legacy/` with an explanatory README.
 - Applied `ruff format` across the codebase (whitespace/layout only; recorded in
