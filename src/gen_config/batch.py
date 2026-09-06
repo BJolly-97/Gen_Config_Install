@@ -2,7 +2,7 @@
 """
 High-throughput batch entry point.
 
-Equivalent to the old Batching_Scripts/Configuration_Master.py, but calls the
+Equivalent to the old legacy/Batching_Scripts/Configuration_Master.py, but calls the
 dictionary/histograms modules directly instead of exec()-ing separate script files
 sharing one global namespace.
 

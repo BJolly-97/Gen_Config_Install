@@ -1,0 +1,40 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite both the software and the method paper below."
+title: "clapp-jolly: Generalised configurational analysis of RMCProfile large-box models"
+abstract: >-
+  A tool for Clapp-style configurational analysis of the large-box atomic models
+  produced by RMCProfile. Generalises the method of Clapp (1971) - originally
+  limited to binary primitive, FCC or BCC crystals - to crystalline materials of
+  any structure with any number of constituent elements.
+type: software
+authors:
+  - family-names: Jolly
+    given-names: Benjamin E.
+    email: b.e.jolly@sheffield.ac.uk
+    affiliation: "University of Sheffield"
+  - family-names: Owen
+    given-names: Lewis R.
+    email: lewis.owen@sheffield.ac.uk
+    affiliation: "University of Sheffield"
+version: "1.0.0"
+license: MIT
+# TODO: point at the public repository once it is published.
+repository-code: "https://github.com/BJolly-97/Gen_Config-private"
+keywords:
+  - configurational analysis
+  - reverse Monte Carlo
+  - RMCProfile
+  - short-range order
+  - chemical disorder
+references:
+  - type: article
+    title: "Atomic Configurations in Binary Alloys"
+    authors:
+      - family-names: Clapp
+        given-names: Philip C.
+    journal: "Physical Review B"
+    volume: 4
+    issue: 2
+    start: 255
+    year: 1971
+    doi: 10.1103/PhysRevB.4.255

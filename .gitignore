@@ -160,3 +160,12 @@ cython_debug/
 #  and can be added to the global gitignore or merged into this file.  For a more nuclear
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
+
+# --- Project-specific ---------------------------------------------------------
+
+# Local/manual analysis runs scribble output directories and data files straight
+# into tests/. Ignore everything under tests/ except the actual pytest suite.
+/tests/*
+!/tests/conftest.py
+!/tests/test_*.py
+!/tests/fixtures/

@@ -16,7 +16,7 @@
 pip install -e .
 ```
 
-###### This installs `numpy`, `pandas`, `matplotlib`, and `tqdm` at compatible versions, and makes the single `gen-config` command available. The implementation lives in `src/gen_config/`; the files in `exe/` and `Batching_Scripts/` are now thin backward-compatible wrappers around it, kept so existing scripts/muscle memory pointing at those exact filenames keep working. The launcher scripts (`Configurational_Analysis.bat` / `.sh`) now work identically on Windows, macOS, and Linux.
+###### This installs `numpy`, `pandas`, `matplotlib`, and `tqdm` at compatible versions, and makes the single `gen-config` command available. The distribution is published as `clapp-jolly`; the import package stays `gen_config`. The implementation lives in `src/gen_config/`; the pre-package script names in `legacy/` are thin backward-compatible wrappers around it (see [`legacy/README.md`](legacy/README.md)), kept so existing scripts/muscle memory pointing at those exact filenames keep working. The launcher scripts (`Configurational_Analysis.bat` / `.sh`) now work identically on Windows, macOS, and Linux.
 
 #### 1. Using the software
 
@@ -57,7 +57,7 @@ gen-config vis --dict-dir . --sublattice 0 --config 1,12,34
 
 ###### Note: batching is deliberately only supported on the many-`.rmc6f`-files-per-structure side, not across multiple different `.cif` files - lattice-site equivalence indices (`--equivalence 0,1` etc.) depend on the order atom types appear in each `.cif`, which isn't guaranteed consistent across different structures.
 
-###### `Batching_Scripts/Configuration_Master.py` (equivalently `python -m gen_config.batch`) still works as a Y/N-prompted dict-then-config orchestrator, but `gen-config config --rmc6f-glob` above is the more capable and more direct way to do real batch work now.
+###### `python -m gen_config.batch` (the old `legacy/Batching_Scripts/Configuration_Master.py`) still works as a Y/N-prompted dict-then-config orchestrator, but `gen-config config --rmc6f-glob` above is the more capable and more direct way to do real batch work now.
 
 
 #### 2. Files Produced by this Software
