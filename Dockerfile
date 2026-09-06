@@ -7,7 +7,7 @@
 #   docker run --rm -v "$PWD:/data" clapp-jolly config --dict-dir . --sublattice 0 --rmc6f run.rmc6f
 
 # ---- build: produce the wheel (version comes from git via setuptools-scm) ----
-FROM python:3.13-slim AS build
+FROM python:3.14-slim AS build
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends git \
@@ -19,7 +19,7 @@ RUN pip install --no-cache-dir build \
     && python -m build --wheel --outdir /wheels
 
 # ---- runtime: slim image with just the package ----
-FROM python:3.13-slim AS runtime
+FROM python:3.14-slim AS runtime
 
 LABEL org.opencontainers.image.title="clapp-jolly" \
       org.opencontainers.image.description="Clapp-style configurational analysis of RMCProfile large-box atomic models" \
