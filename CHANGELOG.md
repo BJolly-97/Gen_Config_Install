@@ -23,10 +23,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - MkDocs (Material) documentation site under `docs/`, built with `--strict` in CI and
   deployable to GitHub Pages via `.github/workflows/docs.yml`.
 - `examples/FeNi/` — a runnable synthetic dataset with a walk-through.
+- Release automation: `.github/workflows/release.yml` builds and publishes to PyPI via
+  Trusted Publishing (OIDC, no tokens) and cuts a GitHub Release on a `v*` tag. See
+  `RELEASING.md`.
 
 ### Changed
 - Renamed the distribution to `clapp-jolly` (the import package stays `gen_config`
   and the command stays `gen-config`).
+- Version is now derived from git tags via `setuptools-scm` (`gen_config.__version__`
+  reads it from the installed metadata); there is no version string to maintain by hand.
 - Rewrote `README.md` as a concise landing page (badges, example plot, quickstart);
   the full command and output-file reference moved to the docs site.
 - Moved the pre-package compatibility wrappers (`exe/`, `Batching_Scripts/`) into
