@@ -16,12 +16,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   system-managed Python.
 - Regression test covering 9-column, bare-10-column and bracketed-10-column
   `.rmc6f` layouts.
+- Continuous integration (GitHub Actions): `ruff` lint + format check, `pytest`
+  with coverage on Linux/macOS/Windows × Python 3.9/3.11/3.13, and a package
+  build + `twine check`.
+- `pre-commit` config, Dependabot, and `CONTRIBUTING.md`.
 
 ### Changed
 - Renamed the distribution to `clapp-jolly` (the import package stays `gen_config`
   and the command stays `gen-config`).
 - Moved the pre-package compatibility wrappers (`exe/`, `Batching_Scripts/`) into
   `legacy/` with an explanatory README.
+- Applied `ruff format` across the codebase (whitespace/layout only; recorded in
+  `.git-blame-ignore-revs`).
 
 ### Fixed
 - `config` now reads `.rmc6f` files whose `Atoms:` section omits the optional
