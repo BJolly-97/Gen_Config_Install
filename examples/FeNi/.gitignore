@@ -1,0 +1,6 @@
+# everything the dict/config run writes into this folder
+*
+!.gitignore
+!README.md
+!FeNi.cif
+!FeNi_solid_solution.rmc6f

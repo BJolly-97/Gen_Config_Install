@@ -1,0 +1,46 @@
+# Development
+
+```bash
+git clone https://github.com/BJolly-97/Gen_Config-private
+cd Gen_Config-private
+python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
+pip install -e ".[dev]"
+pre-commit install
+```
+
+## Checks
+
+```bash
+ruff check .        # lint
+ruff format .       # auto-format
+pytest              # test suite (add --cov for coverage)
+```
+
+`pre-commit` runs `ruff` and hygiene hooks on every commit. CI runs the same plus the
+test matrix (Linux / macOS / Windows × Python 3.9 / 3.11 / 3.13) and a package build.
+
+## Layout
+
+| Path | |
+| --- | --- |
+| `src/gen_config/` | the package — `dictionary`, `histograms`, `visualiser`, `cli`, `batch`, `gui/` |
+| `tests/` | end-to-end regression tests + fixtures |
+| `examples/` | runnable sample datasets |
+| `docs/` | this documentation (MkDocs) |
+| `legacy/` | frozen pre-package entry points, excluded from lint/format |
+
+## Notes
+
+- The numerical core (`histograms.py`, `dictionary.py`) predates the package and carries
+  a deliberately conservative `ruff` ruleset. Prefer small, test-backed changes there,
+  and check `pytest` before and after.
+- `git blame` ignores the bulk-reformat commit via `.git-blame-ignore-revs` — enable it
+  locally with `git config blame.ignoreRevsFile .git-blame-ignore-revs`.
+
+## Building the docs
+
+```bash
+pip install -e ".[docs]"
+mkdocs serve            # live preview at http://127.0.0.1:8000
+mkdocs build --strict   # what CI runs
+```

@@ -53,6 +53,10 @@ dev = [
     "build>=1.0",
     "twine>=5.0",
 ]
+docs = [
+    "mkdocs>=1.6",
+    "mkdocs-material>=9.5",
+]
 
 [project.urls]
 # TODO: point these at the public repository once it is published.

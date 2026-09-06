@@ -1,0 +1,46 @@
+site_name: clapp-jolly
+site_description: Generalised Clapp-style configurational analysis for RMCProfile large-box atomic models
+site_url: https://bjolly-97.github.io/Gen_Config-private/
+repo_url: https://github.com/BJolly-97/Gen_Config-private
+repo_name: BJolly-97/Gen_Config-private
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+  features:
+    - navigation.sections
+    - navigation.top
+    - content.code.copy
+    - content.action.edit
+
+nav:
+  - Overview: index.md
+  - Installation: installation.md
+  - Usage: usage.md
+  - Output files: output-files.md
+  - The method: method.md
+  - Development: development.md
+
+markdown_extensions:
+  - admonition
+  - pymdownx.highlight
+  - pymdownx.superfences
+  - tables
+  - toc:
+      permalink: true
+
+plugins:
+  - search
