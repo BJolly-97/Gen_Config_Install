@@ -1,8 +1,8 @@
 """
 Tests for the species-labelled plot titles/axes added to histograms.run().
 
-The FeNi fixture only has two species, so it can only exercise the "short form"
-(single-species) branch of the labelling rule; the "both sides spelled out" branch
+The FeNi fixture only has two species, so it can only exercise the lone-species-vs-rest
+branch of the labelling rule ("Fe:Ψ"); the "both sides spelled out" branch
 (e.g. "Ni-Cr : Co-Fe" for a 4-element system) is covered by test_pseudo_binary_label_matches_examples
 below, which reproduces the same modulo_sep-based grouping logic directly against the
 worked examples from the request that prompted this feature.
@@ -61,10 +61,11 @@ def test_plots_are_titled_and_labelled(workdir, monkeypatch):
     # internally consistent and every plot names a real species, never a bare index.
     tot_title, a_title, b_title, ab_title = calls["title"]
     assert len(calls["title"]) == 4
-    assert tot_title in ("Fe", "Ni")
+    # 2 species -> the partition is "one species vs everything else", labelled "<species>:Ψ"
+    # (see _group_label() in histograms.py; Ψ = "the other side").
+    assert tot_title in ("Fe:Ψ", "Ni:Ψ")
     assert ab_title == tot_title  # the combined plot reuses the same overall partition title
-    assert a_title == f"{tot_title}\ncentred on Fe" or a_title == f"{tot_title}\ncentred on Ni"
-    assert b_title == f"{tot_title}\ncentred on Fe" or b_title == f"{tot_title}\ncentred on Ni"
+    assert {a_title, b_title} == {f"{tot_title}\ncentred on Fe", f"{tot_title}\ncentred on Ni"}
     assert a_title != b_title  # the two sides of the partition must be labelled differently
 
     # Every title should name a real species (Fe or Ni), never be blank or purely numeric.

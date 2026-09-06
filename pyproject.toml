@@ -1,16 +1,41 @@
 [build-system]
-requires = ["setuptools>=68", "wheel"]
+requires = ["setuptools>=77.0.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "gen-config"
+name = "clapp-jolly"
 version = "1.0.0"
 description = "Generalised tool for Clapp-style configurational analysis of RMCProfile large-box atomic models"
 readme = "README.md"
 requires-python = ">=3.9"
+license = "MIT"
+license-files = ["LICENSE"]
 authors = [
-    { name = "Benjamin E. Jolly" },
-    { name = "Lewis R. Owen" },
+    { name = "Benjamin E. Jolly", email = "b.e.jolly@sheffield.ac.uk" },
+    { name = "Lewis R. Owen", email = "lewis.owen@sheffield.ac.uk" },
+]
+keywords = [
+    "materials-science",
+    "crystallography",
+    "reverse-monte-carlo",
+    "rmcprofile",
+    "configurational-analysis",
+    "short-range-order",
+    "chemical-disorder",
+    "clapp",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Physics",
+    "Topic :: Scientific/Engineering :: Chemistry",
 ]
 dependencies = [
     "numpy>=1.24",
@@ -21,6 +46,12 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = ["pytest>=7.0"]
+
+[project.urls]
+# TODO: point these at the public repository once it is published.
+Homepage = "https://github.com/BJolly-97/Gen_Config-private"
+Repository = "https://github.com/BJolly-97/Gen_Config-private"
+Issues = "https://github.com/BJolly-97/Gen_Config-private/issues"
 
 [project.scripts]
 gen-config = "gen_config.cli:main"
