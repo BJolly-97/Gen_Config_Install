@@ -1,10 +1,10 @@
 [build-system]
-requires = ["setuptools>=77.0.0"]
+requires = ["setuptools>=77.0.0", "setuptools-scm>=8"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "clapp-jolly"
-version = "1.0.0"
+dynamic = ["version"]
 description = "Generalised tool for Clapp-style configurational analysis of RMCProfile large-box atomic models"
 readme = "README.md"
 requires-python = ">=3.9"
@@ -69,6 +69,12 @@ gen-config = "gen_config.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools_scm]
+# Version is derived from the latest `vX.Y.Z` git tag. Untagged builds get a
+# development version (e.g. 1.1.0.dev3+g<sha>); builds with no git metadata at all
+# fall back to this.
+fallback_version = "0.0.0"
 
 [tool.ruff]
 target-version = "py39"
