@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Single entry point for Gen_Config: `gen-config`.
 

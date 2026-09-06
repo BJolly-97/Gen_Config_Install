@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 High-throughput batch entry point.
 

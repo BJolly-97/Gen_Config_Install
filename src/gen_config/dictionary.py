@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Created on Tue Aug 22 13:57:07 2023
 
@@ -7,16 +6,16 @@ Created on Tue Aug 22 13:57:07 2023
 
 # %%Modules
 
-import numpy as np
-import pandas as pd
 import copy
 import itertools
-from fractions import Fraction
-import sys
-from tqdm import tqdm
-import re
 import os
+import re
+import sys
+from fractions import Fraction
 
+import numpy as np
+import pandas as pd
+from tqdm import tqdm
 
 # %%
 
@@ -228,7 +227,7 @@ def run(cif, equivalence=None):
 
     filename = cif.strip('"')
 
-    with open(filename, "r", encoding="utf-8") as file:
+    with open(filename, encoding="utf-8") as file:
         line_read = file.readlines()
 
     # file = open(filename, "r")
@@ -1045,7 +1044,7 @@ def run(cif, equivalence=None):
     pos_file_read = {}
 
     for i in range(len(NN_v)):
-        file_rot = open(filename_stem + ".sym" + str(i), "r")
+        file_rot = open(filename_stem + ".sym" + str(i))
         rot_read = file_rot.readlines()
         file_rot.close()  # Load in the symmetries file, which now contains some number of combinations of 123456 (615243 etc.) corresponding to the rotations of the nearest neighbours
         pos_file_read[i] = rot_read

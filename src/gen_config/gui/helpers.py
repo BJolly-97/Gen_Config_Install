@@ -24,7 +24,7 @@ def read_finsub(dict_dir):
         )
 
     entries = []
-    with open(os.path.join(dict_dir, finsub_name), "r") as f:
+    with open(os.path.join(dict_dir, finsub_name)) as f:
         for line in f:
             line = line.strip()
             if not line:
@@ -50,7 +50,7 @@ def read_config_labels(dict_dir, sublattice):
 
     labels = []
     seen = set()
-    with open(os.path.join(dict_dir, clapp_ext), "r") as f:
+    with open(os.path.join(dict_dir, clapp_ext)) as f:
         for line in f:
             parts = line.split()
             if len(parts) < 2:

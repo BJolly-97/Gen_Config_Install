@@ -1,17 +1,17 @@
-# -*- coding: utf-8 -*-
 """
 Created on Tue Oct  8 15:17:37 2024
 
 @author: CDT3
 """
 
-import pandas as pd
-import numpy as np
-import sys
-from tqdm import tqdm
+import copy
 import os
 import re
-import copy
+import sys
+
+import numpy as np
+import pandas as pd
+from tqdm import tqdm
 
 # %%
 
@@ -124,7 +124,7 @@ def run(dict_dir, sublattice=None, rmc6f=None):
             f"No '.finsub' file found in '{filepath}'. Run 'dict' first to generate the dictionary files."
         )
 
-    sublab_file = open(os.path.join(filepath, sublattice_labels), "r")
+    sublab_file = open(os.path.join(filepath, sublattice_labels))
     sublab_read = sublab_file.readlines()
     sublab_file.close()
 
@@ -174,17 +174,17 @@ def run(dict_dir, sublattice=None, rmc6f=None):
 
     # %%
 
-    basis = open(os.path.join(filepath, basis_ext), "r")
+    basis = open(os.path.join(filepath, basis_ext))
     basis_line_read = basis.readlines()
     basis.close()
     basis_lines = basis_line_read.copy()
 
-    binom = open(os.path.join(filepath, binom_ext), "r")
+    binom = open(os.path.join(filepath, binom_ext))
     binom_line_read = binom.readlines()
     binom.close()
     binom_lines = binom_line_read.copy()
 
-    config = open(os.path.join(filepath, clapp_ext), "r")
+    config = open(os.path.join(filepath, clapp_ext))
     config_line_read = config.readlines()
     config.close()
     config_lines = config_line_read.copy()
@@ -231,7 +231,7 @@ def run(dict_dir, sublattice=None, rmc6f=None):
 
     asym_file = asym_file.strip('"')
 
-    asym = open(asym_file, "r")
+    asym = open(asym_file)
     asym_line_read = asym.readlines()
     asym.close()
     asym_lines = asym_line_read.copy()
@@ -779,7 +779,7 @@ def run(dict_dir, sublattice=None, rmc6f=None):
     for n in range(len(NN_list_df)):
         A1 = []
         for n1 in range(3):
-            A1.append((NN_list_df[n1 + 1].iloc[n] / (U[n1])))
+            A1.append(NN_list_df[n1 + 1].iloc[n] / (U[n1]))
         A1.append(NN_list_df[0].iloc[n])
         A1.append(NN_list_df[5].iloc[n])
         for n1 in range(len(NN_list_df[6].iloc[n])):

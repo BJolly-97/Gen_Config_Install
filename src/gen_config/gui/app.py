@@ -51,8 +51,8 @@ def main():
 
     matplotlib.use("TkAgg")
 
-    from gen_config.gui.dictionary_tab import DictionaryTab
     from gen_config.gui.analysis_tab import AnalysisTab
+    from gen_config.gui.dictionary_tab import DictionaryTab
     from gen_config.gui.visualiser_tab import VisualiserTab
 
     root = tk.Tk()

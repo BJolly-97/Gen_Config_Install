@@ -1,15 +1,15 @@
-# -*- coding: utf-8 -*-
 """
 Created on Mon Jun 24 13:18:40 2024
 
 @author: CDT3
 """
 
+import os
+
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
-import os
 
 
 def _load_basis_and_config(dict_dir, sublattice):
@@ -32,7 +32,7 @@ def _load_basis_and_config(dict_dir, sublattice):
             f"No '.basis{sub_num}'/'.cfgdict{sub_num}' files found in '{filepath}' for sub-lattice {sub_num}."
         )
 
-    basis = open(os.path.join(filepath, basis_ext), "r")
+    basis = open(os.path.join(filepath, basis_ext))
     line_read = basis.readlines()
     basis.close()
 
@@ -45,7 +45,7 @@ def _load_basis_and_config(dict_dir, sublattice):
     basis_df.drop([0, 4, 5], axis=1, inplace=True)
     basis_df.rename(columns={1: "x", 2: "y", 3: "z", 5: "Atom No."}, inplace=True)
 
-    config_dict = open(os.path.join(filepath, clapp_ext), "r")
+    config_dict = open(os.path.join(filepath, clapp_ext))
     config_read = config_dict.readlines()
     config_dict.close()
 
@@ -185,7 +185,7 @@ def main(dict_dir=None):
             f"No '.finsub' file found in '{filepath}'. Run 'dict' first to generate the dictionary files."
         )
 
-    sublab_file = open(os.path.join(filepath, sublattice_labels), "r")
+    sublab_file = open(os.path.join(filepath, sublattice_labels))
     sublab_read = sublab_file.readlines()
     sublab_file.close()
 
