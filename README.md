@@ -97,13 +97,13 @@ pre-commit install
 pytest
 ```
 
-See [CONTRIBUTING.md](CONTRIBUTING.md). CI runs `ruff` plus the test suite on
-Linux/macOS/Windows × Python 3.9/3.11/3.13.
+See [`.github/CONTRIBUTING.md`](.github/CONTRIBUTING.md). CI runs `ruff` plus the test
+suite on Linux/macOS/Windows × Python 3.9/3.11/3.13.
 
 ## Citing
 
-If you use this software, please cite both the software (see [CITATION.cff](CITATION.cff))
-and the Clapp 1971 paper linked above.
+If you use this software, please cite both the software (see
+[`.github/CITATION.cff`](.github/CITATION.cff)) and the Clapp 1971 paper linked above.
 
 ## License
 
