@@ -1,21 +1,21 @@
 # Installation
 
-`clapp-jolly` requires **Python 3.9 or newer**. It depends only on `numpy`, `pandas`,
+`gen-config` requires **Python 3.9 or newer**. It depends only on `numpy`, `pandas`,
 `matplotlib` and `tqdm`, all of which install as wheels on Windows, macOS and Linux.
 
 ## From PyPI
 
 ```bash
-pip install clapp-jolly
+pip install gen-config
 ```
 
 For an isolated install of just the command-line tool (recommended if you only want to
 *run* it, not import it):
 
 ```bash
-pipx install clapp-jolly
+pipx install gen-config
 # or
-uv tool install clapp-jolly
+uv tool install gen-config
 ```
 
 ## From source
@@ -33,7 +33,7 @@ commands with no Python install on the host — useful for reproducible batch ru
 cluster or in CI. Mount your working directory at `/data`:
 
 ```bash
-docker run --rm -v "$PWD:/data" ghcr.io/bjolly-97/clapp-jolly \
+docker run --rm -v "$PWD:/data" ghcr.io/bjolly-97/gen-config \
     config --dict-dir . --sublattice 0 --rmc6f run.rmc6f
 ```
 

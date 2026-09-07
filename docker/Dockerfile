@@ -4,7 +4,7 @@
 # interactive `vis` viewer and the desktop GUI need a display and are not usable
 # from a container.
 #
-#   docker run --rm -v "$PWD:/data" clapp-jolly config --dict-dir . --sublattice 0 --rmc6f run.rmc6f
+#   docker run --rm -v "$PWD:/data" gen-config config --dict-dir . --sublattice 0 --rmc6f run.rmc6f
 
 # ---- build: produce the wheel (version comes from git via setuptools-scm) ----
 FROM python:3.14-slim AS build
@@ -21,7 +21,7 @@ RUN pip install --no-cache-dir build \
 # ---- runtime: slim image with just the package ----
 FROM python:3.14-slim AS runtime
 
-LABEL org.opencontainers.image.title="clapp-jolly" \
+LABEL org.opencontainers.image.title="gen-config" \
       org.opencontainers.image.description="Clapp-style configurational analysis of RMCProfile large-box atomic models" \
       org.opencontainers.image.source="https://github.com/BJolly-97/Gen_Config_Install" \
       org.opencontainers.image.licenses="MIT"

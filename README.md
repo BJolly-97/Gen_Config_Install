@@ -28,13 +28,13 @@ The original code files for the package can be found in a separate public repo: 
 ## Installation
 
 ```bash
-pip install clapp-jolly
+pip install gen-config
 ```
 
 or, for an isolated command-line install:
 
 ```bash
-pipx install clapp-jolly        # or:  uv tool install clapp-jolly
+pipx install gen-config        # or:  uv tool install gen-config
 ```
 NB: pipx is its own installation tool used to download software packages in isolated environments. If intending to use pipx for this package, please refer to pipx installation guides. For Windows users:
 
@@ -44,13 +44,13 @@ python -m pipx ensurepath
 
 #Restart your terminal.
 
-python -m pipx install clapp-jolly
+python -m pipx install gen-config
 ```
 
 For Mac users, the GUI interface - built in Tkinter - requires further downloads. The quickest and easiest way to resolve this conflict, is to use the Mac installation of python on python.org, which bundles Tk as required. You can then use the command:
 
 ```bash
-pip3 install clapp-jolly
+pip3 install gen-config
 ```
 
 Alternatively, using Homebrew, one may instead use:
@@ -65,7 +65,7 @@ pipx ensurepath
 Or run the headless CLI with no Python install via Docker:
 
 ```bash
-docker run --rm -v "$PWD:/data" ghcr.io/bjolly-97/clapp-jolly config --dict-dir . --sublattice 0 --rmc6f run.rmc6f
+docker run --rm -v "$PWD:/data" ghcr.io/bjolly-97/gen-config config --dict-dir . --sublattice 0 --rmc6f run.rmc6f
 ```
 
 Either way you get one command, **`gen-config`**. (The importable package is

@@ -27,8 +27,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   built and smoke-tested in CI and pushed to GHCR on release.
 
 ### Changed
-- Renamed the distribution to `clapp-jolly` (the import package stays `gen_config`
-  and the command stays `gen-config`).
+- The project is an installable package: distribution `gen-config`, import package
+  `gen_config`, command `gen-config`.
 - Version is now derived from git tags via `setuptools-scm` (`gen_config.__version__`
   reads it from the installed metadata); there is no version string to maintain by hand.
 - Rewrote `README.md` as a concise landing page (badges, example plot, quickstart);

@@ -15,7 +15,7 @@ imports and calls the real implementation:
 | `exe/Histograms_v2_2.py`, `Batching_Scripts/Histograms_v2_2.py` | `gen-config config` |
 | `exe/Visualiser.py` | `gen-config vis` |
 | `Batching_Scripts/Configuration_Master.py` | `python -m gen_config.batch` (or `gen-config config --rmc6f-glob ...`) |
-| `Batching_Scripts/Requirements.bat` | `pip install -e .` (or `pip install clapp-jolly`) |
+| `Batching_Scripts/Requirements.bat` | `pip install -e .` (or `pip install gen-config`) |
 
 They require the package to be installed first (`pip install -e .` from the repo
 root). New work should use `gen-config` directly; this directory will be removed

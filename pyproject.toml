@@ -3,7 +3,7 @@ requires = ["setuptools>=77.0.0", "setuptools-scm>=8"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "clapp-jolly"
+name = "gen-config"
 dynamic = ["version"]
 description = "Generalised tool for Clapp-style configurational analysis of RMCProfile large-box atomic models"
 readme = "README.md"
