@@ -46,7 +46,13 @@ python -m pipx ensurepath
 python -m pipx install clapp-jolly
 ```
 
-For Mac users, ensure you have Homebrew installed, and then follow:
+For Mac users, the GUI interface - built in Tkinter - requires further downloads. The quickest and easiest way to resolve this conflict, is to use the Mac installation of python on python.org, which bundles Tk as required. You can then use the command:
+
+```bash
+pip3 install clapp-jolly
+```
+
+Alternatively, using Homebrew, one may instead use:
 
 ```bash
 brew install pipx python-tk
