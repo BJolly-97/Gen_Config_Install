@@ -1,17 +1,19 @@
-# clapp-jolly
+#Gen-Config
 
 [![CI](https://github.com/BJolly-97/Gen_Config_Install/actions/workflows/ci.yml/badge.svg)](https://github.com/BJolly-97/Gen_Config_Install/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 ![Python](https://img.shields.io/badge/python-3.9%20%E2%80%93%203.13-blue)
 
-**Generalised Clapp-style configurational analysis for RMCProfile large-box atomic models.**
+**A Generalised Tool for the Analysis of Atomic Configurations in Crystalline Materials**
 
-Quantifies chemical short-range order in the large-box models produced by
-[RMCProfile](https://rmcprofile.pages.ornl.gov/) by computing the statistical
-*enhancement factor* (β) of every local atomic configuration. It generalises the
+This tool has been created for the quantification of chemical short-range order in the large-box models produced by
+[RMCProfile](https://rmcprofile.pages.ornl.gov/), through the computation of statistical
+*enhancement factors* (β) for local atomic configurations. The framework outlined here redefines and generalises the
 method of **[P. C. Clapp, *Atomic Configurations in Binary Alloys*, Phys. Rev. B **4**, 255 (1971)](https://doi.org/10.1103/PhysRevB.4.255)**
 — originally limited to binary primitive/FCC/BCC crystals — to **any crystal
 structure with any number of elements**.
+
+** Bugs, general usability concerns, or any further queries should therefore be reported/forwarded to Dr. Ben Jolly (b.e.jolly@sheffield.ac.uk) or Dr. Lewis Owen (lewis.owen@sheffield.ac.uk).**
 
 <p align="center">
   <img src="docs/assets/example-histogram.png" alt="Enhancement-factor histogram for an Fe/Ni solid solution" width="520">
