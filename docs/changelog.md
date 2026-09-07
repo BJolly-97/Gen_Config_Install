@@ -11,9 +11,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `LICENSE` (MIT), `CHANGELOG.md`, and `CITATION.cff`.
 - Full packaging metadata in `pyproject.toml` (classifiers, keywords, project URLs,
   PEP 639 license declaration).
-- macOS/Linux launcher (`Configurational_Analysis.command` / `.sh`) that builds a
-  self-contained virtual environment on first run, so it never installs into a
-  system-managed Python.
 - Regression test covering 9-column, bare-10-column and bracketed-10-column
   `.rmc6f` layouts.
 - Continuous integration (GitHub Actions): `ruff` lint + format check, `pytest`
@@ -42,6 +39,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `.git-blame-ignore-revs`).
 - Tidied the repository root: `CONTRIBUTING` / `CITATION` / `RELEASING` moved to
   `.github/`, the changelog to `docs/`, and the Dockerfile to `docker/`.
+
+### Removed
+- The `Configurational_Analysis.bat` / `.sh` launcher scripts. `pip install` /
+  `pipx install` / the Docker image cover installation on every platform.
 
 ### Fixed
 - `config` now reads `.rmc6f` files whose `Atoms:` section omits the optional
