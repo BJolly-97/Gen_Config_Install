@@ -11,7 +11,7 @@ as `1.2.4.devN+g<sha>` (not publishable to PyPI, by design).
 
 | Field | Value |
 | --- | --- |
-| PyPI project name | `clapp-jolly` |
+| PyPI project name | `gen-config` |
 | Owner | `BJolly-97` |
 | Repository name | `Gen_Config_Install` |
 | Workflow name | `release.yml` |
@@ -33,11 +33,11 @@ a publish needs a manual click.
    git push origin v1.2.3
    ```
 4. The **Release** workflow then builds the sdist + wheel, publishes to PyPI, pushes the
-   Docker image to `ghcr.io/bjolly-97/clapp-jolly`, and opens a GitHub Release with the
+   Docker image to `ghcr.io/bjolly-97/gen-config`, and opens a GitHub Release with the
    artifacts attached and auto-generated notes (edit them to match the changelog).
 
 Pre-release tags (`v1.2.3-rc1`) are published to PyPI as pre-releases and marked as such
 on GitHub automatically.
 
-After the **first** release, make the GHCR package public: *Packages → clapp-jolly →
+After the **first** release, make the GHCR package public: *Packages → gen-config →
 Package settings → Change visibility → Public* (and, optionally, link it to this repo).

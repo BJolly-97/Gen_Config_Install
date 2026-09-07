@@ -1,4 +1,4 @@
-# clapp-jolly
+# gen-config
 
 [![CI](https://github.com/BJolly-97/Gen_Config_Install/actions/workflows/ci.yml/badge.svg)](https://github.com/BJolly-97/Gen_Config_Install/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
@@ -23,13 +23,13 @@ structure with any number of elements**.
 ## Installation
 
 ```bash
-pip install clapp-jolly
+pip install gen-config
 ```
 
 or, for an isolated command-line install:
 
 ```bash
-pipx install clapp-jolly        # or:  uv tool install clapp-jolly
+pipx install gen-config        # or:  uv tool install gen-config
 ```
 
 From a clone, for development:
@@ -41,7 +41,7 @@ pip install -e ".[dev]"
 Or run the headless CLI with no Python install via Docker:
 
 ```bash
-docker run --rm -v "$PWD:/data" ghcr.io/bjolly-97/clapp-jolly config --dict-dir . --sublattice 0 --rmc6f run.rmc6f
+docker run --rm -v "$PWD:/data" ghcr.io/bjolly-97/gen-config config --dict-dir . --sublattice 0 --rmc6f run.rmc6f
 ```
 
 Either way you get one command, **`gen-config`**. (The importable package is

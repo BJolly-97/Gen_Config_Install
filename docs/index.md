@@ -1,8 +1,8 @@
-# clapp-jolly
+# gen-config
 
 **Generalised Clapp-style configurational analysis for RMCProfile large-box atomic models.**
 
-`clapp-jolly` quantifies chemical short-range order in the large-box models produced by
+`gen-config` quantifies chemical short-range order in the large-box models produced by
 [RMCProfile](https://rmcprofile.pages.ornl.gov/). For every distinct local atomic
 configuration it computes the statistical **enhancement factor** (β) — how much more
 (or less) common that configuration is than a random solid solution would predict.
@@ -16,7 +16,7 @@ with any number of constituent elements**. See [The method](method.md) for a sho
 overview.
 
 !!! note "Input formats"
-    `clapp-jolly` currently reads RMCProfile `.rmc6f` configuration files and `.cif`
+    `gen-config` currently reads RMCProfile `.rmc6f` configuration files and `.cif`
     structures only.
 
 ## Where next
