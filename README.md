@@ -61,12 +61,6 @@ pipx ensurepath
 #Restart your terminal.
 ```
 
-From a clone, for development:
-
-```bash
-pip install -e ".[dev]"
-```
-
 Or run the headless CLI with no Python install via Docker:
 
 ```bash
