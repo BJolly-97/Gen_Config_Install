@@ -1,8 +1,8 @@
 site_name: clapp-jolly
 site_description: Generalised Clapp-style configurational analysis for RMCProfile large-box atomic models
-site_url: https://bjolly-97.github.io/Gen_Config-private/
-repo_url: https://github.com/BJolly-97/Gen_Config-private
-repo_name: BJolly-97/Gen_Config-private
+site_url: https://bjolly-97.github.io/Gen_Config_Install/
+repo_url: https://github.com/BJolly-97/Gen_Config_Install
+repo_name: BJolly-97/Gen_Config_Install
 edit_uri: edit/main/docs/
 
 theme:

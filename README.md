@@ -1,6 +1,6 @@
 # clapp-jolly
 
-[![CI](https://github.com/BJolly-97/Gen_Config-private/actions/workflows/ci.yml/badge.svg)](https://github.com/BJolly-97/Gen_Config-private/actions/workflows/ci.yml)
+[![CI](https://github.com/BJolly-97/Gen_Config_Install/actions/workflows/ci.yml/badge.svg)](https://github.com/BJolly-97/Gen_Config_Install/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 ![Python](https://img.shields.io/badge/python-3.9%20%E2%80%93%203.13-blue)
 

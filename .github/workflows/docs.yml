@@ -1,13 +1,11 @@
-# Deploys the MkDocs site to GitHub Pages.
-#
-# Manual-only for now (workflow_dispatch): enable Pages first under
-#   Settings -> Pages -> Source: GitHub Actions
-# (needs a public repo, or GitHub Pro/Team for a private one). Once that's done you can
-# add a `push: branches: [main]` trigger here to publish on every merge.
+# Deploys the MkDocs site to GitHub Pages on every push to main.
+# Requires Pages to be enabled once: Settings -> Pages -> Source: GitHub Actions.
 
 name: Docs
 
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -24,6 +22,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0  # setuptools-scm
       - uses: actions/setup-python@v7
         with:
           python-version: "3.13"
