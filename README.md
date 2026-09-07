@@ -1,17 +1,22 @@
-# gen-config
+# Gen-Config
 
 [![CI](https://github.com/BJolly-97/Gen_Config_Install/actions/workflows/ci.yml/badge.svg)](https://github.com/BJolly-97/Gen_Config_Install/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 ![Python](https://img.shields.io/badge/python-3.9%20%E2%80%93%203.13-blue)
 
-**Generalised Clapp-style configurational analysis for RMCProfile large-box atomic models.**
+**A Generalised Tool for the Analysis of Atomic Configurations in Crystalline Materials**
 
-Quantifies chemical short-range order in the large-box models produced by
-[RMCProfile](https://rmcprofile.pages.ornl.gov/) by computing the statistical
-*enhancement factor* (β) of every local atomic configuration. It generalises the
+This tool has been created for the quantification of chemical short-range order in the large-box models produced by
+[RMCProfile](https://rmcprofile.pages.ornl.gov/), through the computation of statistical
+*enhancement factors* (β) for local atomic configurations. The framework outlined here redefines and generalises the
 method of **[P. C. Clapp, *Atomic Configurations in Binary Alloys*, Phys. Rev. B **4**, 255 (1971)](https://doi.org/10.1103/PhysRevB.4.255)**
 — originally limited to binary primitive/FCC/BCC crystals — to **any crystal
 structure with any number of elements**.
+
+** Bugs, general usability concerns, or any further queries should therefore be reported/forwarded to Dr. Ben Jolly (b.e.jolly@sheffield.ac.uk) or Dr. Lewis Owen (lewis.owen@sheffield.ac.uk).**
+
+The original code files for the package can be found in a separate public repo: https://github.com/BJolly-97/Gen_Config/tree/main . These files are preserved to ensure usability (including the original launchers) and to provide the original versions as untouched by Claude/agents.
+
 
 <p align="center">
   <img src="docs/assets/example-histogram.png" alt="Enhancement-factor histogram for an Fe/Ni solid solution" width="520">
@@ -31,11 +36,30 @@ or, for an isolated command-line install:
 ```bash
 pipx install gen-config        # or:  uv tool install gen-config
 ```
-
-From a clone, for development:
+NB: pipx is its own installation tool used to download software packages in isolated environments. If intending to use pipx for this package, please refer to pipx installation guides. For Windows users:
 
 ```bash
-pip install -e ".[dev]"
+python -m pip install --user pipx
+python -m pipx ensurepath
+
+#Restart your terminal.
+
+python -m pipx install gen-config
+```
+
+For Mac users, the GUI interface - built in Tkinter - requires further downloads. The quickest and easiest way to resolve this conflict, is to use the Mac installation of python on python.org, which bundles Tk as required. You can then use the command:
+
+```bash
+pip3 install gen-config
+```
+
+Alternatively, using Homebrew, one may instead use:
+
+```bash
+brew install pipx python-tk
+pipx ensurepath
+
+#Restart your terminal.
 ```
 
 Or run the headless CLI with no Python install via Docker:
