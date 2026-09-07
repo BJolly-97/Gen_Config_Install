@@ -23,7 +23,7 @@ FROM python:3.14-slim AS runtime
 
 LABEL org.opencontainers.image.title="clapp-jolly" \
       org.opencontainers.image.description="Clapp-style configurational analysis of RMCProfile large-box atomic models" \
-      org.opencontainers.image.source="https://github.com/BJolly-97/Gen_Config-private" \
+      org.opencontainers.image.source="https://github.com/BJolly-97/Gen_Config_Install" \
       org.opencontainers.image.licenses="MIT"
 
 ENV MPLBACKEND=Agg \

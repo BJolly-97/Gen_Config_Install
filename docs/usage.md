@@ -6,7 +6,7 @@ flags and answer prompts) or **scripted** (pass flags, no prompts). One dataset 
 several hundred go through the same code path.
 
 A complete, runnable walk-through is in
-[`examples/FeNi/`](https://github.com/BJolly-97/Gen_Config-private/tree/main/examples/FeNi).
+[`examples/FeNi/`](https://github.com/BJolly-97/Gen_Config_Install/tree/main/examples/FeNi).
 
 ## `dict` — structure dictionaries
 

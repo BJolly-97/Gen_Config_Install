@@ -21,7 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   build + `twine check`.
 - `pre-commit` config, Dependabot, and `CONTRIBUTING.md`.
 - MkDocs (Material) documentation site under `docs/`, built with `--strict` in CI and
-  deployable to GitHub Pages via `.github/workflows/docs.yml`.
+  auto-deployed to GitHub Pages on every push to `main`.
 - `examples/FeNi/` — a runnable synthetic dataset with a walk-through.
 - Release automation: `.github/workflows/release.yml` builds and publishes to PyPI via
   Trusted Publishing (OIDC, no tokens) and cuts a GitHub Release on a `v*` tag. See
@@ -40,6 +40,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `legacy/` with an explanatory README.
 - Applied `ruff format` across the codebase (whitespace/layout only; recorded in
   `.git-blame-ignore-revs`).
+- Tidied the repository root: `CONTRIBUTING` / `CITATION` / `RELEASING` moved to
+  `.github/`, the changelog to `docs/`, and the Dockerfile to `docker/`.
 
 ### Fixed
 - `config` now reads `.rmc6f` files whose `Atoms:` section omits the optional

@@ -18,8 +18,7 @@ authors:
     affiliation: "University of Sheffield"
 version: "1.0.0"
 license: MIT
-# TODO: point at the public repository once it is published.
-repository-code: "https://github.com/BJolly-97/Gen_Config-private"
+repository-code: "https://github.com/BJolly-97/Gen_Config_Install"
 keywords:
   - configurational analysis
   - reverse Monte Carlo

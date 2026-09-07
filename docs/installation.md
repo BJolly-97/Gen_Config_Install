@@ -21,8 +21,8 @@ uv tool install clapp-jolly
 ## From source
 
 ```bash
-git clone https://github.com/BJolly-97/Gen_Config-private
-cd Gen_Config-private
+git clone https://github.com/BJolly-97/Gen_Config_Install
+cd Gen_Config_Install
 pip install -e ".[dev]"
 ```
 

@@ -1,8 +1,8 @@
 # Development
 
 ```bash
-git clone https://github.com/BJolly-97/Gen_Config-private
-cd Gen_Config-private
+git clone https://github.com/BJolly-97/Gen_Config_Install
+cd Gen_Config_Install
 python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -e ".[dev]"
 pre-commit install
