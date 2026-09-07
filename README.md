@@ -49,7 +49,7 @@ python -m pipx install clapp-jolly
 For Mac users, ensure you have Homebrew installed, and then follow:
 
 ```bash
-brew install pipx python-tk@3.13
+brew install pipx python-tk@3.14
 pipx ensurepath
 
 #Restart your terminal.
