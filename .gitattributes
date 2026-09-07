@@ -1,0 +1,8 @@
+# Normalise line endings: LF in the repository and in every working tree.
+* text=auto eol=lf
+
+# Binaries / data — leave the bytes exactly as they are.
+*.png binary
+
+# The one legacy Windows batch file that genuinely needs CRLF.
+legacy/Batching_Scripts/Requirements.bat text eol=crlf

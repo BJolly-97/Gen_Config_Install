@@ -60,9 +60,3 @@ Tkinter:
 - **Linux** — install separately, e.g. `sudo apt install python3-tk`.
 - **macOS system Python** often ships an old, buggy Tk; prefer the python.org build or
   `brew install python-tk`.
-
-## Launcher scripts
-
-The repository root has double-click launcher scripts for users who would rather not
-touch a terminal — they create a local virtual environment and install into it on first
-run. Once `clapp-jolly` is on PyPI, `pipx install` is the simpler cross-platform route.
