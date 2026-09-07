@@ -17,6 +17,7 @@ structure with any number of elements**.
 
 The original code files for the package can be found in a separate public repo: https://github.com/BJolly-97/Gen_Config/tree/main . These files are preserved to ensure usability (including the original launchers) and to provide the original versions as untouched by Claude/agents.
 
+
 <p align="center">
   <img src="docs/assets/example-histogram.png" alt="Enhancement-factor histogram for an Fe/Ni solid solution" width="520">
 </p>
