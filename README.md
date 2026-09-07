@@ -35,7 +35,25 @@ or, for an isolated command-line install:
 ```bash
 pipx install clapp-jolly        # or:  uv tool install clapp-jolly
 ```
-NB: pipx is its own installation tool used to download software packages in isolated environments. If intending to use pipx for this package, please refer to pipx installation guides.
+NB: pipx is its own installation tool used to download software packages in isolated environments. If intending to use pipx for this package, please refer to pipx installation guides. For Windows users:
+
+```bash
+python -m pip install --user pipx
+python -m pipx ensurepath
+
+#Restart your terminal.
+
+python -m pipx install clapp-jolly
+```
+
+For Mac users:
+
+```bash
+brew install pipx
+pipx ensurepath
+
+#Restart your terminal.
+```
 
 From a clone, for development:
 
