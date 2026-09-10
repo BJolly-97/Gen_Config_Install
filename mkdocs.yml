@@ -37,6 +37,7 @@ nav:
 
 markdown_extensions:
   - admonition
+  - pymdownx.details      # collapsible ??? / ???+ admonitions
   - pymdownx.highlight
   - pymdownx.superfences
   - tables
