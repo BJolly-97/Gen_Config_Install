@@ -1,7 +1,7 @@
 # Gen-Config
 
 [![CI](https://github.com/BJolly-97/Gen_Config_Install/actions/workflows/ci.yml/badge.svg)](https://github.com/BJolly-97/Gen_Config_Install/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/BJolly-97/Gen_Config_Install/blob/main/LICENSE)
 ![Python](https://img.shields.io/badge/python-3.9%20%E2%80%93%203.13-blue)
 
 **A Generalised Tool for the Analysis of Atomic Configurations in Crystalline Materials**
@@ -19,7 +19,7 @@ The original code files for the package can be found in a separate public repo: 
 
 
 <p align="center">
-  <img src="docs/assets/example-histogram.png" alt="Enhancement-factor histogram for an Fe/Ni solid solution" width="520">
+  <img src="https://raw.githubusercontent.com/BJolly-97/Gen_Config_Install/main/docs/assets/example-histogram.png" alt="Enhancement-factor histogram for an Fe/Ni solid solution" width="520">
 </p>
 
 > **Input format:** currently reads RMCProfile `.rmc6f` configuration files and `.cif`
@@ -69,11 +69,11 @@ docker run --rm -v "$PWD:/data" ghcr.io/bjolly-97/gen-config config --dict-dir .
 ```
 
 Either way you get one command, **`gen-config`**. (The importable package is
-`gen_config`; the pre-package script names live in [`legacy/`](legacy/).)
+`gen_config`; the pre-package script names live in [`legacy/`](https://github.com/BJolly-97/Gen_Config_Install/tree/main/legacy).)
 
 ## Quickstart
 
-Using the bundled [`examples/FeNi/`](examples/FeNi/):
+Using the bundled [`examples/FeNi/`](https://github.com/BJolly-97/Gen_Config_Install/tree/main/examples/FeNi):
 
 ```bash
 cd examples/FeNi
@@ -111,7 +111,7 @@ gen-config config --dict-dir . --sublattice 0 --rmc6f-glob "configs/*.rmc6f"
 ```
 
 Full command reference, the interactive workflow, and a description of every output
-file are in **[the documentation](docs/index.md)**.
+file are on the **[documentation site](https://bjolly-97.github.io/Gen_Config_Install/)** ([Usage](https://bjolly-97.github.io/Gen_Config_Install/usage/), [Output files](https://bjolly-97.github.io/Gen_Config_Install/output-files/)).
 
 ## Development
 
@@ -121,16 +121,16 @@ pre-commit install
 pytest
 ```
 
-See [`.github/CONTRIBUTING.md`](.github/CONTRIBUTING.md). CI runs `ruff` plus the test
+See [`.github/CONTRIBUTING.md`](https://github.com/BJolly-97/Gen_Config_Install/blob/main/.github/CONTRIBUTING.md). CI runs `ruff` plus the test
 suite on Linux/macOS/Windows × Python 3.9/3.11/3.13.
 
 ## Citing
 
 If you use this software, please cite both the software (see
-[`.github/CITATION.cff`](.github/CITATION.cff)) and the Clapp 1971 paper linked above.
+[`.github/CITATION.cff`](https://github.com/BJolly-97/Gen_Config_Install/blob/main/.github/CITATION.cff)) and the Clapp 1971 paper linked above.
 
 ## License
 
-[MIT](LICENSE) © Benjamin E. Jolly and Lewis R. Owen, University of Sheffield.
+[MIT](https://github.com/BJolly-97/Gen_Config_Install/blob/main/LICENSE) © Benjamin E. Jolly and Lewis R. Owen, University of Sheffield.
 
 Questions: Dr. Ben Jolly (b.e.jolly@sheffield.ac.uk), Dr. Lewis Owen (lewis.owen@sheffield.ac.uk).
