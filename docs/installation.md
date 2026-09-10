@@ -17,6 +17,24 @@ pipx install gen-config
 # or
 uv tool install gen-config
 ```
+??? info "New to pipx? (optional reading)"
+
+    pipx is a separate installation tool that downloads Python command-line
+    packages into isolated environments, so `gen-config` and its dependencies
+    never clash with anything else on your system. If you intend to use pipx,
+    see the [pipx installation guide](https://pipx.pypa.io/stable/installation/).
+
+    For Windows:
+
+    ```bash
+    python -m pip install --user pipx
+    python -m pipx ensurepath
+
+    # Restart your terminal, then:
+
+    python -m pipx install gen-config
+    ```
+
 
 ## From source
 
