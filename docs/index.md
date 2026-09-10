@@ -25,60 +25,6 @@ The original code files for the package can be found in a separate public repo: 
 > **Input format:** currently reads RMCProfile `.rmc6f` configuration files and `.cif`
 > structures only.
 
-## Installation
-
-```bash
-pip install gen-config
-```
-
-or, for an isolated command-line install:
-
-```bash
-pipx install gen-config        # or:  uv tool install gen-config
-```
-
-??? info "New to pipx? (optional reading)"
-
-    pipx is a separate installation tool that downloads Python command-line
-    packages into isolated environments, so `gen-config` and its dependencies
-    never clash with anything else on your system. If you intend to use pipx,
-    see the [pipx installation guide](https://pipx.pypa.io/stable/installation/).
-
-    For Windows:
-
-    ```bash
-    python -m pip install --user pipx
-    python -m pipx ensurepath
-
-    # Restart your terminal, then:
-
-    python -m pipx install gen-config
-    ```
-
-For Mac users, the GUI interface - built in Tkinter - requires further downloads. The quickest and easiest way to resolve this conflict, is to use the Mac installation of python on python.org, which bundles Tk as required. You can then use the command:
-
-```bash
-pip3 install gen-config
-```
-
-Alternatively, using Homebrew, one may instead use:
-
-```bash
-brew install pipx python-tk
-pipx ensurepath
-
-#Restart your terminal.
-```
-
-Or run the headless CLI with no Python install via Docker:
-
-```bash
-docker run --rm -v "$PWD:/data" ghcr.io/bjolly-97/gen-config config --dict-dir . --sublattice 0 --rmc6f run.rmc6f
-```
-
-Either way you get one command, **`gen-config`**. (The importable package is
-`gen_config`; the pre-package script names live in [`legacy/`](https://github.com/BJolly-97/Gen_Config_Install/tree/main/legacy).)
-
 ## Quickstart
 
 Using the bundled [`examples/FeNi/`](https://github.com/BJolly-97/Gen_Config_Install/tree/main/examples/FeNi):
