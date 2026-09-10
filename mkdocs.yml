@@ -39,9 +39,6 @@ markdown_extensions:
   - admonition
   - pymdownx.highlight
   - pymdownx.superfences
-  - pymdownx.snippets:
-      base_path: ["."]      # so docs/index.md can pull in the repo-root README
-      check_paths: true
   - tables
   - toc:
       permalink: true
