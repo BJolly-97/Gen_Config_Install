@@ -37,19 +37,23 @@ or, for an isolated command-line install:
 pipx install gen-config        # or:  uv tool install gen-config
 ```
 
-<details>
-  <summary><i>Wow, so fancy</i></summary>
-  NB: pipx is its own installation tool used to download software packages in isolated environments. If intending to use pipx for this package, please refer to      pipx installation guides. For Windows users:
+??? info "New to pipx? (optional reading)"
 
-  ```bash
-  python -m pip install --user pipx
-  python -m pipx ensurepath
+    pipx is a separate installation tool that downloads Python command-line
+    packages into isolated environments, so `gen-config` and its dependencies
+    never clash with anything else on your system. If you intend to use pipx,
+    see the [pipx installation guide](https://pipx.pypa.io/stable/installation/).
 
-  #Restart your terminal.
+    For Windows:
 
-  python -m pipx install gen-config
-  ```
-</details>
+    ```bash
+    python -m pip install --user pipx
+    python -m pipx ensurepath
+
+    # Restart your terminal, then:
+
+    python -m pipx install gen-config
+    ```
 
 For Mac users, the GUI interface - built in Tkinter - requires further downloads. The quickest and easiest way to resolve this conflict, is to use the Mac installation of python on python.org, which bundles Tk as required. You can then use the command:
 
